@@ -16,6 +16,8 @@ class LetterSubmission extends Model
         'file_path',
         'status',
         'letter_number',
+        'is_sk',
+        'submission_date',
         'alasan_penolakan',
         'approved_by',
         'approved_at',
@@ -25,6 +27,8 @@ class LetterSubmission extends Model
     protected $casts = [
         'approved_at' => 'datetime',
         'rejected_at' => 'datetime',
+        'submission_date' => 'date',
+        'is_sk' => 'boolean',
     ];
 
     public function user()

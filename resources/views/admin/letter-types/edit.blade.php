@@ -25,18 +25,39 @@
                             @error('name') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
                         </div>
 
-                        <div class="mb-8">
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Bidang</label>
+                            <input type="text" name="bidang" value="{{ old('bidang', $letterType->bidang) }}" class="w-full border-gray-200 rounded-xl shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 px-4 py-2.5" placeholder="Contoh: UMUM, PERENCANAAN">
+                            @error('bidang') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
+                        </div>
+
+                        <div class="mb-6">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi <span class="text-gray-400">(opsional)</span></label>
                             <textarea name="description" rows="3" class="w-full border-gray-200 rounded-xl shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 px-4 py-2.5">{{ old('description', $letterType->description) }}</textarea>
                             @error('description') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
                         </div>
 
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Kuota Bulanan</label>
+                                <input type="number" name="monthly_quota" value="{{ old('monthly_quota', $letterType->monthly_quota) }}" min="1" class="w-full border-gray-200 rounded-xl shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 px-4 py-2.5">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Sisipan Per Hari</label>
+                                <input type="number" name="daily_insertion" value="{{ old('daily_insertion', $letterType->daily_insertion) }}" min="1" class="w-full border-gray-200 rounded-xl shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 px-4 py-2.5">
+                            </div>
+                        </div>
+
+                        <div class="mb-8">
+                            <label class="flex items-center gap-3">
+                                <input type="checkbox" name="is_active" value="1" {{ $letterType->is_active ? 'checked' : '' }} class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500">
+                                <span class="text-sm font-medium text-gray-700">Aktif</span>
+                            </label>
+                        </div>
+
                         <div class="flex justify-end gap-3">
                             <a href="{{ route('admin.letter-types.index') }}" class="inline-flex items-center px-5 py-2.5 rounded-xl text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition">Batal</a>
-                            <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition shadow-sm">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                Update
-                            </button>
+                            <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition shadow-sm">Update</button>
                         </div>
                     </form>
                 </div>

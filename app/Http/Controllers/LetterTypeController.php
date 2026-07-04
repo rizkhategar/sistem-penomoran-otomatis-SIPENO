@@ -9,7 +9,7 @@ class LetterTypeController extends Controller
 {
     public function index()
     {
-        $letterTypes = LetterType::latest()->paginate(10);
+        $letterTypes = LetterType::with('creator')->latest()->paginate(10);
         return view('admin.letter-types.index', compact('letterTypes'));
     }
 
@@ -23,10 +23,22 @@ class LetterTypeController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:50|unique:letter_types,code',
+            'bidang' => 'nullable|string|max:100',
             'description' => 'nullable|string|max:500',
+            'monthly_quota' => 'nullable|integer|min:1',
+            'daily_insertion' => 'nullable|integer|min:1',
         ]);
 
-        LetterType::create($request->all());
+        LetterType::create([
+            'name' => $request->name,
+            'code' => $request->code,
+            'bidang' => $request->bidang,
+            'description' => $request->description,
+            'created_by' => auth()->id(),
+            'monthly_quota' => $request->monthly_quota ?? 5,
+            'daily_insertion' => $request->daily_insertion ?? 5,
+            'is_active' => true,
+        ]);
 
         return redirect()->route('admin.letter-types.index')->with('success', 'Jenis surat berhasil ditambahkan.');
     }
@@ -41,10 +53,17 @@ class LetterTypeController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:50|unique:letter_types,code,' . $letterType->id,
+            'bidang' => 'nullable|string|max:100',
             'description' => 'nullable|string|max:500',
+            'monthly_quota' => 'nullable|integer|min:1',
+            'daily_insertion' => 'nullable|integer|min:1',
+            'is_active' => 'boolean',
         ]);
 
-        $letterType->update($request->all());
+        $letterType->update($request->only([
+            'name', 'code', 'bidang', 'description',
+            'monthly_quota', 'daily_insertion', 'is_active'
+        ]));
 
         return redirect()->route('admin.letter-types.index')->with('success', 'Jenis surat berhasil diupdate.');
     }

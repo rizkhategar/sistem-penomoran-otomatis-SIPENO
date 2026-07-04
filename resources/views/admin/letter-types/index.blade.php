@@ -3,7 +3,7 @@
         <div class="flex justify-between items-center">
             <div>
                 <h2 class="text-xl font-bold text-gray-800">Jenis Surat</h2>
-                <p class="text-sm text-gray-500 mt-0.5">Kelola jenis surat yang dapat diajukan</p>
+                <p class="text-sm text-gray-500 mt-0.5">Kelola jenis surat yang dapat dibuat</p>
             </div>
             <a href="{{ route('admin.letter-types.create') }}" class="inline-flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl hover:bg-blue-700 transition shadow-sm text-sm font-medium">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -50,15 +50,19 @@
                     @if($type->description)
                         <p class="text-sm text-gray-500">{{ $type->description }}</p>
                     @endif
-                    <div class="mt-3 text-xs text-gray-400">
-                        {{ $type->submissions()->count() }} pengajuan
+                    <div class="mt-3 flex items-center gap-2 text-xs text-gray-400 flex-wrap">
+                        <span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{{ $type->bidang ?? 'Umum' }}</span>
+                        <span>{{ $type->submissions()->count() }} surat</span>
+                        @if(!$type->is_active)
+                            <span class="bg-red-50 text-red-600 px-2 py-0.5 rounded-full">Nonaktif</span>
+                        @endif
                     </div>
                 </div>
                 @empty
                 <div class="sm:col-span-2 lg:col-span-3 text-center py-16">
                     <svg class="w-14 h-14 mx-auto mb-4 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     <p class="text-gray-400 font-medium mb-1">Belum ada jenis surat</p>
-                    <p class="text-gray-400 text-sm mb-4">Tambah jenis surat agar warga bisa mengajukan.</p>
+                    <p class="text-gray-400 text-sm mb-4">Tambah jenis surat agar user bisa membuat surat.</p>
                     <a href="{{ route('admin.letter-types.create') }}" class="inline-flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl hover:bg-blue-700 transition text-sm font-medium shadow-sm">Tambah Sekarang</a>
                 </div>
                 @endforelse

@@ -27,6 +27,7 @@ class AdminUserController extends Controller
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'role' => 'required|in:user,admin',
+            'bidang' => 'nullable|string|max:100',
         ]);
 
         User::create([
@@ -34,28 +35,38 @@ class AdminUserController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => $request->role,
+            'bidang' => $request->bidang,
         ]);
 
         return redirect()->route('admin.users.index')->with('success', 'Akun berhasil dibuat.');
     }
 
-    public function editRole(User $user)
+    public function edit(User $user)
     {
-        return view('admin.users.edit-role', compact('user'));
+        return view('admin.users.edit', compact('user'));
     }
 
-    public function updateRole(Request $request, User $user)
+    public function update(Request $request, User $user)
     {
         $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class.',id,'.$user->id],
             'role' => 'required|in:user,admin',
+            'bidang' => 'nullable|string|max:100',
         ]);
 
-        if ($user->id === auth()->id()) {
+        if ($user->id === auth()->id() && $request->role !== $user->role) {
             return back()->with('error', 'Tidak bisa mengubah role diri sendiri.');
         }
 
-        $user->update(['role' => $request->role]);
+        $data = $request->only(['name', 'email', 'role', 'bidang']);
+        if ($request->filled('password')) {
+            $request->validate(['password' => ['confirmed', Rules\Password::defaults()]]);
+            $data['password'] = Hash::make($request->password);
+        }
 
-        return redirect()->route('admin.users.index')->with('success', 'Role user berhasil diupdate.');
+        $user->update($data);
+
+        return redirect()->route('admin.users.index')->with('success', 'Akun berhasil diupdate.');
     }
 }

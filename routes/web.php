@@ -6,7 +6,7 @@ use App\Http\Controllers\LetterSubmissionController;
 use App\Http\Controllers\AdminLetterController;
 use App\Http\Controllers\LetterTypeController;
 use App\Http\Controllers\AdminUserController;
-use Illuminate\Notifications\DatabaseNotification;
+use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -23,31 +23,13 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('submissions', LetterSubmissionController::class)
         ->except(['edit', 'update']);
-    Route::post('/submissions/{submission}/resubmit', [LetterSubmissionController::class, 'resubmit'])
-        ->name('submissions.resubmit');
-});
 
-Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/submissions', [AdminLetterController::class, 'index'])->name('submissions.index');
-    Route::get('/submissions/{submission}', [AdminLetterController::class, 'show'])->name('submissions.show');
-    Route::post('/submissions/{submission}/approve', [AdminLetterController::class, 'approve'])->name('submissions.approve');
-    Route::post('/submissions/{submission}/reject', [AdminLetterController::class, 'reject'])->name('submissions.reject');
+    Route::get('/report', [ReportController::class, 'index'])->name('report.index');
 
-    Route::resource('letter-types', LetterTypeController::class)
-        ->except(['show']);
+    Route::get('/manual', function () {
+        return view('manual');
+    })->name('manual');
 
-    Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
-    Route::get('/users/create', [AdminUserController::class, 'create'])->name('users.create');
-    Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
-    Route::get('/users/{user}/edit-role', [AdminUserController::class, 'editRole'])->name('users.edit-role');
-    Route::put('/users/{user}/role', [AdminUserController::class, 'updateRole'])->name('users.update-role');
-});
-
-Route::middleware('auth')->group(function () {
-    Route::post('/notifications/{id}/read', function (DatabaseNotification $id) {
-        $id->markAsRead();
-        return back();
-    })->name('notifications.read');
     Route::post('/notifications/read-all', function () {
         auth()->user()->unreadNotifications->markAsRead();
         return back();
@@ -72,6 +54,20 @@ Route::middleware('auth')->group(function () {
         }
         return response()->json(['unread' => $unread, 'html' => $html]);
     })->name('notifications.data');
+});
+
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/submissions', [AdminLetterController::class, 'index'])->name('submissions.index');
+    Route::get('/submissions/{submission}', [AdminLetterController::class, 'show'])->name('submissions.show');
+
+    Route::resource('letter-types', LetterTypeController::class)
+        ->except(['show']);
+
+    Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+    Route::get('/users/create', [AdminUserController::class, 'create'])->name('users.create');
+    Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
+    Route::get('/users/{user}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
+    Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
 });
 
 require __DIR__.'/auth.php';

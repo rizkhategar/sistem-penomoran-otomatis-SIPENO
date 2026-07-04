@@ -31,6 +31,12 @@
                         </div>
 
                         <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Bidang</label>
+                            <input type="text" name="bidang" value="{{ old('bidang') }}" class="w-full border-gray-200 rounded-xl shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 px-4 py-2.5 text-sm" placeholder="Contoh: UMUM, PERENCANAAN">
+                            @error('bidang') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
+                        </div>
+
+                        <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
                             <input type="password" name="password" class="w-full border-gray-200 rounded-xl shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 px-4 py-2.5 text-sm" required>
                             @error('password') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
@@ -51,7 +57,7 @@
                                             <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                                         </div>
                                         <p class="font-medium text-gray-800 text-sm">User</p>
-                                        <p class="text-xs text-gray-400">Mengajukan surat</p>
+                                        <p class="text-xs text-gray-400">Membuat surat</p>
                                     </div>
                                 </label>
                                 <label class="relative">

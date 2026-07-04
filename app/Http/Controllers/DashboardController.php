@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\LetterSubmission;
 use App\Models\LetterType;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -18,12 +19,20 @@ class DashboardController extends Controller
 
             $stats = [
                 'total' => LetterSubmission::count(),
-                'pending' => LetterSubmission::where('status', 'pending')->count(),
                 'approved' => LetterSubmission::where('status', 'approved')->count(),
-                'rejected' => LetterSubmission::where('status', 'rejected')->count(),
             ];
 
-            // Monthly chart data (current year)
+            $perBidang = LetterSubmission::selectRaw('letter_type_id, COUNT(*) as total')
+                ->groupBy('letter_type_id')
+                ->with('letterType')
+                ->get()
+                ->groupBy(fn($s) => $s->letterType->bidang ?? 'UMUM');
+
+            $bidangStats = [];
+            foreach ($perBidang as $bidang => $items) {
+                $bidangStats[$bidang] = $items->sum('total');
+            }
+
             $monthly = LetterSubmission::selectRaw("MONTH(created_at) as bulan, COUNT(*) as total")
                 ->whereYear('created_at', now()->year)
                 ->groupBy('bulan')
@@ -37,7 +46,6 @@ class DashboardController extends Controller
                 $monthlyData[] = $monthly[$i] ?? 0;
             }
 
-            // Per letter type chart data
             $perType = LetterSubmission::selectRaw('letter_type_id, COUNT(*) as total')
                 ->groupBy('letter_type_id')
                 ->with('letterType')
@@ -45,18 +53,25 @@ class DashboardController extends Controller
             $typeLabels = $perType->map(fn($s) => $s->letterType->name ?? 'Unknown');
             $typeData = $perType->pluck('total');
 
+            $bidangs = User::whereNotNull('bidang')->distinct('bidang')->pluck('bidang');
+
             return view('dashboard', compact(
                 'submissions', 'stats',
                 'monthlyLabels', 'monthlyData',
-                'typeLabels', 'typeData'
+                'typeLabels', 'typeData',
+                'bidangStats', 'bidangs'
             ));
         }
 
+        $bidang = auth()->user()->bidang;
         $submissions = LetterSubmission::with('letterType')
             ->where('user_id', auth()->id())
             ->latest()
             ->paginate(10);
 
-        return view('dashboard', compact('submissions'));
+        $bidangTotal = LetterSubmission::whereHas('letterType', fn($q) => $q->where('bidang', $bidang))
+            ->count();
+
+        return view('dashboard', compact('submissions', 'bidang', 'bidangTotal'));
     }
 }

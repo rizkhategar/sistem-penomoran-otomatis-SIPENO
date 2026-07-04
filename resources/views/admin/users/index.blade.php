@@ -34,6 +34,7 @@
                             <tr class="bg-gray-50/50">
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">User</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Bidang</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Role</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Bergabung</th>
                                 <th class="px-6 py-3"></th>
@@ -56,6 +57,7 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-500">{{ $user->email }}</td>
+                                <td class="px-6 py-4"><span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">{{ $user->bidang ?? '-' }}</span></td>
                                 <td class="px-6 py-4">
                                     @if($user->isAdmin())
                                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border bg-purple-50 text-purple-700 border-purple-200">
@@ -72,7 +74,7 @@
                                 <td class="px-6 py-4 text-sm text-gray-500">{{ $user->created_at->format('d M Y') }}</td>
                                 <td class="px-6 py-4 text-right">
                                     @if($user->id !== auth()->id())
-                                        <a href="{{ route('admin.users.edit-role', $user) }}" class="text-blue-600 hover:text-blue-700 font-medium text-sm">Ubah Role</a>
+                                        <a href="{{ route('admin.users.edit', $user) }}" class="text-blue-600 hover:text-blue-700 font-medium text-sm">Edit</a>
                                     @else
                                         <span class="text-gray-300 text-sm">-</span>
                                     @endif

@@ -16,6 +16,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'bidang',
     ];
 
     protected $hidden = [
@@ -36,5 +37,10 @@ class User extends Authenticatable
     public function letterSubmissions()
     {
         return $this->hasMany(LetterSubmission::class);
+    }
+
+    public function letterTypes()
+    {
+        return $this->hasMany(LetterType::class, 'created_by');
     }
 }

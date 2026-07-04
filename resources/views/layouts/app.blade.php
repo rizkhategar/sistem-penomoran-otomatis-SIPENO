@@ -12,11 +12,9 @@
 </head>
 <body class="font-sans antialiased bg-gray-50">
     <div class="min-h-screen">
-        {{-- Top Navigation --}}
         <nav x-data="{ open: false }" class="bg-gradient-to-r from-blue-800 to-blue-900 shadow-lg">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between h-16">
-                    {{-- Logo & Brand --}}
                     <div class="flex items-center gap-3">
                         <a href="{{ route('dashboard') }}" class="flex items-center gap-3">
                             <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-8 h-8 object-contain">
@@ -27,7 +25,6 @@
                         </a>
                     </div>
 
-                    {{-- Desktop Nav --}}
                     <div class="hidden md:flex items-center gap-1">
                         <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                             {{ __('Dashboard') }}
@@ -35,7 +32,7 @@
                         @auth
                             @if(Auth::user()->isAdmin())
                                 <x-nav-link :href="route('admin.submissions.index')" :active="request()->routeIs('admin.submissions.*')">
-                                    {{ __('Pengajuan Masuk') }}
+                                    {{ __('Semua Surat') }}
                                 </x-nav-link>
                                 <x-nav-link :href="route('admin.letter-types.index')" :active="request()->routeIs('admin.letter-types.*')">
                                     {{ __('Jenis Surat') }}
@@ -45,18 +42,22 @@
                                 </x-nav-link>
                             @else
                                 <x-nav-link :href="route('submissions.create')" :active="request()->routeIs('submissions.create')">
-                                    {{ __('Ajukan Surat') }}
+                                    {{ __('Buat Surat') }}
                                 </x-nav-link>
                                 <x-nav-link :href="route('submissions.index')" :active="request()->routeIs('submissions.*')">
-                                    {{ __('Pengajuan Saya') }}
+                                    {{ __('Surat Saya') }}
                                 </x-nav-link>
                             @endif
+                            <x-nav-link :href="route('report.index')" :active="request()->routeIs('report.*')">
+                                {{ __('Report') }}
+                            </x-nav-link>
+                            <x-nav-link :href="route('manual')" :active="request()->routeIs('manual')">
+                                {{ __('Manual') }}
+                            </x-nav-link>
                         @endauth
                     </div>
 
-                    {{-- Right Side --}}
                     <div class="flex items-center gap-2">
-                        {{-- Notifikasi Realtime --}}
                         <div x-data="notifDropdown()" class="relative">
                             <button @click="toggle()" class="relative p-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
@@ -141,7 +142,6 @@
                             </x-slot>
                         </x-dropdown>
 
-                        {{-- Mobile menu button --}}
                         <button @click="open = ! open" class="md:hidden inline-flex items-center justify-center p-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition">
                             <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                                 <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -152,7 +152,6 @@
                 </div>
             </div>
 
-            {{-- Mobile Nav --}}
             <div x-show="open" @click.away="open = false" class="md:hidden border-t border-white/10">
                 <div class="px-2 py-3 space-y-1 max-w-7xl mx-auto">
                     <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
@@ -161,7 +160,7 @@
                     @auth
                         @if(Auth::user()->isAdmin())
                             <x-responsive-nav-link :href="route('admin.submissions.index')" :active="request()->routeIs('admin.submissions.*')">
-                                {{ __('Pengajuan Masuk') }}
+                                {{ __('Semua Surat') }}
                             </x-responsive-nav-link>
                             <x-responsive-nav-link :href="route('admin.letter-types.index')" :active="request()->routeIs('admin.letter-types.*')">
                                 {{ __('Jenis Surat') }}
@@ -171,18 +170,23 @@
                             </x-responsive-nav-link>
                         @else
                             <x-responsive-nav-link :href="route('submissions.create')" :active="request()->routeIs('submissions.create')">
-                                {{ __('Ajukan Surat') }}
+                                {{ __('Buat Surat') }}
                             </x-responsive-nav-link>
                             <x-responsive-nav-link :href="route('submissions.index')" :active="request()->routeIs('submissions.*')">
-                                {{ __('Pengajuan Saya') }}
+                                {{ __('Surat Saya') }}
                             </x-responsive-nav-link>
                         @endif
+                        <x-responsive-nav-link :href="route('report.index')" :active="request()->routeIs('report.*')">
+                            {{ __('Report') }}
+                        </x-responsive-nav-link>
+                        <x-responsive-nav-link :href="route('manual')" :active="request()->routeIs('manual')">
+                            {{ __('Manual') }}
+                        </x-responsive-nav-link>
                     @endauth
                 </div>
             </div>
         </nav>
 
-        {{-- Page Header --}}
         @if (isset($header))
             <header class="bg-white border-b border-gray-200">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
@@ -191,7 +195,6 @@
             </header>
         @endif
 
-        {{-- Page Content --}}
         <main>
             {{ $slot }}
         </main>
