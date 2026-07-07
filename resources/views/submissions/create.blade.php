@@ -29,7 +29,7 @@
                             <select name="letter_type_id" class="w-full border-gray-200 rounded-xl shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 px-4 py-2.5" required>
                                 <option value="">Pilih jenis surat</option>
                                 @foreach($letterTypes as $type)
-                                    <option value="{{ $type->id }}" {{ old('letter_type_id') == $type->id ? 'selected' : '' }}>{{ $type->name }} ({{ $type->code }}) - {{ $type->bidang ?? 'Umum' }}</option>
+                                    <option value="{{ $type->id }}" {{ old('letter_type_id') == $type->id ? 'selected' : '' }}>{{ $type->name }}</option>
                                 @endforeach
                             </select>
                             @error('letter_type_id') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
