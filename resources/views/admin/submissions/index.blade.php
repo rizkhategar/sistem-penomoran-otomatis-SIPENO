@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div>
             <h2 class="text-xl font-bold text-gray-800">Semua Surat</h2>
-            <p class="text-sm text-gray-500 mt-0.5">Daftar seluruh surat yang telah dibuat</p>
+            <p class="text-sm text-gray-500 mt-0.5">Admin hanya mengelola surat yang sudah diajukan, bukan menyetujui penomoran</p>
         </div>
     </x-slot>
 
@@ -14,6 +14,12 @@
                     <span>{{ session('success') }}</span>
                 </div>
             @endif
+            @if(session('error'))
+                <div class="mb-6 bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-xl flex items-center gap-3">
+                    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span>{{ session('error') }}</span>
+                </div>
+            @endif
 
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <div class="overflow-x-auto">
@@ -23,7 +29,8 @@
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">No</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Pembuat</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Jenis Surat</th>
-                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Bidang</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Pengolah</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Ditujukan Kepada</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">No. Surat</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tanggal</th>
                                 <th class="px-6 py-3"></th>
@@ -39,20 +46,27 @@
                                         <span class="font-medium text-gray-800 text-sm">{{ $sub->user->name }}</span>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 text-sm text-gray-600">{{ $sub->letterType->name }}</td>
-                                <td class="px-6 py-4"><span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">{{ $sub->letterType->bidang ?? '-' }}</span></td>
+                                <td class="px-6 py-4 text-sm text-gray-600">{{ $sub->letterType->name }}<span class="text-xs text-gray-400 block">{{ $sub->letterType->bidang ?? '-' }}</span></td>
+                                <td class="px-6 py-4 text-sm text-gray-600">{{ $sub->pengolah ?? '-' }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">{{ $sub->ditujukan_kepada ?? '-' }}</td>
                                 <td class="px-6 py-4 text-sm font-medium text-gray-800">{{ $sub->letter_number }}</td>
-                                <td class="px-6 py-4 text-sm text-gray-500">{{ $sub->created_at->format('d/m/Y') }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-500">{{ ($sub->submission_date ?: $sub->created_at)->format('d/m/Y') }}</td>
                                 <td class="px-6 py-4 text-right">
-                                    <a href="{{ route('admin.submissions.show', $sub) }}" class="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium text-sm">
-                                        Detail
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                                    </a>
+                                    <div class="flex items-center gap-2 justify-end">
+                                        <a href="{{ route('admin.submissions.show', $sub) }}" class="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium text-sm">
+                                            Detail
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                        </a>
+                                        <form action="{{ route('admin.submissions.destroy', $sub) }}" method="POST" onsubmit="return confirm('Hapus surat ini?')">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" class="text-red-500 hover:text-red-600 font-medium text-sm">Hapus</button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="7" class="px-6 py-16 text-center">
+                                <td colspan="8" class="px-6 py-16 text-center">
                                     <svg class="w-14 h-14 mx-auto mb-4 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                     <p class="text-gray-400 font-medium">Belum ada surat</p>
                                 </td>
