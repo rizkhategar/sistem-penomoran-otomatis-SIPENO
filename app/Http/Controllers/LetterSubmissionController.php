@@ -106,7 +106,7 @@ class LetterSubmissionController extends Controller
 
         $request->validate([
             'letter_type_id' => 'required|exists:letter_types,id',
-            'number_format' => ['required', 'string', 'max:100', 'regex:/^[0-9A-Za-z.\/\-]+$/'],
+            'number_format' => ['required', 'string', 'size:16', 'regex:/^\d{3}\/\d{3}\/\d{2}\.\d\.\d\.\d$/'],
             'pengolah' => 'required|string|max:255',
             'ditujukan_kepada' => 'required|string|max:255',
             'keperluan' => 'required|string|max:1000',
@@ -114,7 +114,8 @@ class LetterSubmissionController extends Controller
             'is_sk' => 'boolean',
             'submission_date' => 'nullable|date|before_or_equal:today',
         ], [
-            'number_format.regex' => 'Format nomor hanya boleh berisi huruf, angka, garis miring (/), titik, dan strip. Contoh: 470/800/00.1.2.3',
+            'number_format.size' => 'Format nomor harus mengikuti pola 000/000/00.0.0.0.',
+            'number_format.regex' => 'Format nomor harus mengikuti pola 000/000/00.0.0.0. Ganti angka 0 sesuai kebutuhan, pemisah / dan . tidak diubah.',
         ]);
 
         $letterType = LetterType::findOrFail($request->letter_type_id);
