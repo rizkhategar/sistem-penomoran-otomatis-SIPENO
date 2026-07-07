@@ -18,16 +18,16 @@
                     @auth
                         @if(Auth::user()->isAdmin())
                             <x-nav-link :href="route('admin.submissions.index')" :active="request()->routeIs('admin.submissions.*')">
-                                {{ __('Semua Pengajuan') }}
-                            </x-nav-link>
-                            <x-nav-link :href="route('admin.letter-types.index')" :active="request()->routeIs('admin.letter-types.*')">
-                                {{ __('Jenis Surat') }}
+                                {{ __('Kelola Surat') }}
                             </x-nav-link>
                         @else
                             <x-nav-link :href="route('submissions.index')" :active="request()->routeIs('submissions.*')">
-                                {{ __('Pengajuan Saya') }}
+                                {{ __('Semua Surat') }}
                             </x-nav-link>
                         @endif
+                        <x-nav-link :href="route('report.index')" :active="request()->routeIs('report.*')">
+                            {{ __('Report') }}
+                        </x-nav-link>
                     @endauth
                 </div>
             </div>
@@ -87,16 +87,16 @@
             @auth
                 @if(Auth::user()->isAdmin())
                     <x-responsive-nav-link :href="route('admin.submissions.index')" :active="request()->routeIs('admin.submissions.*')">
-                        {{ __('Semua Pengajuan') }}
-                    </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('admin.letter-types.index')" :active="request()->routeIs('admin.letter-types.*')">
-                        {{ __('Jenis Surat') }}
+                        {{ __('Kelola Surat') }}
                     </x-responsive-nav-link>
                 @else
                     <x-responsive-nav-link :href="route('submissions.index')" :active="request()->routeIs('submissions.*')">
-                        {{ __('Pengajuan Saya') }}
+                        {{ __('Semua Surat') }}
                     </x-responsive-nav-link>
                 @endif
+                <x-responsive-nav-link :href="route('report.index')" :active="request()->routeIs('report.*')">
+                    {{ __('Report') }}
+                </x-responsive-nav-link>
             @endauth
         </div>
 
