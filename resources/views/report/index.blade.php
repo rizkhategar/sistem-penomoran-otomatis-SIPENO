@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div>
             <h2 class="text-xl font-bold text-gray-800">Report Bulanan</h2>
-            <p class="text-sm text-gray-500 mt-0.5">Laporan surat per bulan</p>
+            <p class="text-sm text-gray-500 mt-0.5">Laporan surat per bulan yang bisa diunduh sebagai PDF</p>
         </div>
     </x-slot>
 
@@ -26,7 +26,6 @@
                             @endforeach
                         </select>
                     </div>
-                    @if(auth()->user()->isAdmin())
                     <div>
                         <label class="block text-xs font-medium text-gray-500 mb-1">Bidang</label>
                         <select name="bidang" class="border-gray-200 rounded-xl shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 px-4 py-2">
@@ -36,8 +35,10 @@
                             @endforeach
                         </select>
                     </div>
-                    @endif
                     <button type="submit" class="px-5 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition text-sm font-medium shadow-sm">Tampilkan</button>
+                    <a href="{{ route('report.pdf', request()->only('bulan', 'tahun', 'bidang')) }}" class="px-5 py-2.5 bg-gray-800 text-white rounded-xl hover:bg-gray-900 transition text-sm font-medium shadow-sm">
+                        Download PDF
+                    </a>
                 </form>
             </div>
 
@@ -49,7 +50,7 @@
                 </div>
                 @foreach($perJenis as $item)
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-                    <p class="text-sm text-gray-500 font-medium">{{ $item->letterType->name }}</p>
+                    <p class="text-sm text-gray-500 font-medium">{{ $item->letterType->name ?? 'Jenis tidak ditemukan' }}</p>
                     <p class="text-3xl font-bold text-indigo-600 mt-1">{{ $item->total }}</p>
                     <p class="text-xs text-gray-400 mt-1">{{ $item->letterType->bidang ?? '-' }}</p>
                 </div>
@@ -68,6 +69,8 @@
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Pembuat</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Jenis</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Bidang</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Pengolah</th>
+                                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tujuan</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">No. Surat</th>
                                 <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tanggal</th>
                             </tr>
@@ -84,12 +87,14 @@
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-600">{{ $sub->letterType->name }}</td>
                                 <td class="px-6 py-4"><span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">{{ $sub->letterType->bidang ?? '-' }}</span></td>
+                                <td class="px-6 py-4 text-sm text-gray-600">{{ $sub->pengolah ?? '-' }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">{{ $sub->ditujukan_kepada ?? '-' }}</td>
                                 <td class="px-6 py-4 text-sm font-medium text-gray-800">{{ $sub->letter_number }}</td>
-                                <td class="px-6 py-4 text-sm text-gray-500">{{ $sub->created_at->format('d/m/Y') }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-500">{{ ($sub->submission_date ?: $sub->created_at)->format('d/m/Y') }}</td>
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-16 text-center">
+                                <td colspan="8" class="px-6 py-16 text-center">
                                     <p class="text-gray-400 font-medium">Tidak ada data untuk periode ini</p>
                                 </td>
                             </tr>
