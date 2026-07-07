@@ -8,6 +8,7 @@ use App\Models\LetterType;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class LetterSubmissionController extends Controller
@@ -58,6 +59,16 @@ class LetterSubmissionController extends Controller
         }
     }
 
+    private function bidangOptions(): array
+    {
+        return [
+            'PELAYANAN PENDAFTARAN PENDUDUK',
+            'PELAYANAN PENCATATAN SIPIL',
+            'PIAK',
+            'SEKRETARIATAN',
+        ];
+    }
+
     private function letterTypeOrder(): array
     {
         return [
@@ -88,13 +99,15 @@ class LetterSubmissionController extends Controller
         }
 
         $order = $this->letterTypeOrder();
+        $bidangs = $this->bidangOptions();
         $letterTypes = LetterType::where('is_active', true)
             ->whereIn('name', $order)
+            ->whereIn('bidang', $bidangs)
             ->get()
             ->sortBy(fn ($type) => array_search($type->name, $order, true))
             ->values();
 
-        return view('submissions.create', compact('letterTypes'));
+        return view('submissions.create', compact('letterTypes', 'bidangs'));
     }
 
     public function store(Request $request)
@@ -105,6 +118,7 @@ class LetterSubmissionController extends Controller
         }
 
         $request->validate([
+            'bidang' => ['required', Rule::in($this->bidangOptions())],
             'letter_type_id' => 'required|exists:letter_types,id',
             'number_format' => ['required', 'string', 'size:16', 'regex:/^\d{3}\/\d{3}\/\d{2}\.\d\.\d\.\d$/'],
             'pengolah' => 'required|string|max:255',
@@ -119,6 +133,12 @@ class LetterSubmissionController extends Controller
         ]);
 
         $letterType = LetterType::findOrFail($request->letter_type_id);
+        if ($letterType->bidang !== $request->bidang) {
+            throw ValidationException::withMessages([
+                'letter_type_id' => 'Jenis surat tidak sesuai dengan bidang yang dipilih.',
+            ]);
+        }
+
         $date = ($request->boolean('is_sk') && $request->submission_date)
             ? Carbon::parse($request->submission_date)
             : now();

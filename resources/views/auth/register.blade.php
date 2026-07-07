@@ -24,6 +24,17 @@
         </div>
 
         <div class="mb-4">
+            <label for="bidang" class="block text-sm font-medium text-gray-700 mb-1.5">Bidang</label>
+            <select id="bidang" name="bidang" required class="w-full border-gray-200 rounded-xl shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 px-4 py-2.5 text-sm">
+                <option value="">Pilih bidang</option>
+                @foreach($bidangs as $bidang)
+                    <option value="{{ $bidang }}" {{ old('bidang') === $bidang ? 'selected' : '' }}>{{ $bidang }}</option>
+                @endforeach
+            </select>
+            <x-input-error :messages="$errors->get('bidang')" class="mt-1.5" />
+        </div>
+
+        <div class="mb-4">
             <label for="password" class="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
             <input id="password" type="password" name="password" required autocomplete="new-password"
                 class="w-full border-gray-200 rounded-xl shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 px-4 py-2.5 text-sm"

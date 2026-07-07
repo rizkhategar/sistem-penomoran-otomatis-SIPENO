@@ -25,30 +25,31 @@
                         @csrf
 
                         <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Surat</label>
-                            <select name="letter_type_id" class="w-full border-gray-200 rounded-xl shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 px-4 py-2.5" required>
-                                <option value="">Pilih jenis surat</option>
-                                @foreach($letterTypes as $type)
-                                    <option value="{{ $type->id }}" {{ old('letter_type_id') == $type->id ? 'selected' : '' }}>{{ $type->name }}</option>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Bidang</label>
+                            <select id="bidangSelect" name="bidang" class="w-full border-gray-200 rounded-xl shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 px-4 py-2.5" required>
+                                <option value="">Pilih bidang</option>
+                                @foreach($bidangs as $bidang)
+                                    <option value="{{ $bidang }}" {{ old('bidang') === $bidang ? 'selected' : '' }}>{{ $bidang }}</option>
                                 @endforeach
                             </select>
+                            @error('bidang') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
+                        </div>
+
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Surat</label>
+                            <select id="letterTypeSelect" name="letter_type_id" class="w-full border-gray-200 rounded-xl shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 px-4 py-2.5" required>
+                                <option value="">Pilih jenis surat</option>
+                                @foreach($letterTypes as $type)
+                                    <option value="{{ $type->id }}" data-bidang="{{ $type->bidang }}" {{ old('letter_type_id') == $type->id ? 'selected' : '' }}>{{ $type->name }}</option>
+                                @endforeach
+                            </select>
+                            <p class="text-xs text-gray-400 mt-1.5">Pilih bidang terlebih dahulu agar jenis surat sesuai bidangnya.</p>
                             @error('letter_type_id') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
                         </div>
 
                         <div class="mb-6">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Format Nomor Surat</label>
-                            <input
-                                id="numberFormatInput"
-                                type="text"
-                                name="number_format"
-                                value="{{ old('number_format', '000/000/00.0.0.0') }}"
-                                class="w-full border-gray-200 rounded-xl shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 px-4 py-2.5 font-mono tracking-wide"
-                                inputmode="numeric"
-                                autocomplete="off"
-                                spellcheck="false"
-                                maxlength="16"
-                                required
-                            >
+                            <input id="numberFormatInput" type="text" name="number_format" value="{{ old('number_format', '000/000/00.0.0.0') }}" class="w-full border-gray-200 rounded-xl shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 px-4 py-2.5 font-mono tracking-wide" inputmode="numeric" autocomplete="off" spellcheck="false" maxlength="16" required>
                             <p class="text-xs text-gray-400 mt-1.5">Pemisah / dan . dibuat tetap. Angka yang dihapus akan kembali menjadi 0, jadi cukup ganti angka sesuai kebutuhan.</p>
                             @error('number_format') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
                         </div>
@@ -75,7 +76,6 @@
                         <div class="mb-6">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Upload File (opsional)</label>
                             <div class="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-blue-400 transition cursor-pointer" onclick="document.getElementById('fileInput').click()">
-                                <svg class="w-10 h-10 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
                                 <p class="text-sm text-gray-500 mb-1">Klik untuk upload file</p>
                                 <p class="text-xs text-gray-400">Format: PDF, JPG, PNG. Maks 2MB</p>
                                 <p id="fileName" class="text-sm text-blue-600 font-medium mt-2 hidden"></p>
@@ -98,6 +98,29 @@
                         </div>
 
                         <script>
+                            const bidangSelect = document.getElementById('bidangSelect');
+                            const letterTypeSelect = document.getElementById('letterTypeSelect');
+                            const allLetterTypeOptions = Array.from(letterTypeSelect.options).map(option => option.cloneNode(true));
+
+                            function filterLetterTypes() {
+                                const selectedBidang = bidangSelect.value;
+                                const selectedValue = letterTypeSelect.value;
+                                letterTypeSelect.innerHTML = '';
+
+                                allLetterTypeOptions.forEach(option => {
+                                    if (!option.value || option.dataset.bidang === selectedBidang) {
+                                        letterTypeSelect.appendChild(option.cloneNode(true));
+                                    }
+                                });
+
+                                if ([...letterTypeSelect.options].some(option => option.value === selectedValue)) {
+                                    letterTypeSelect.value = selectedValue;
+                                }
+                            }
+
+                            bidangSelect?.addEventListener('change', filterLetterTypes);
+                            filterLetterTypes();
+
                             const skCheckbox = document.querySelector('[name="is_sk"]');
                             skCheckbox?.addEventListener('change', function() {
                                 document.getElementById('skDateField').classList.toggle('hidden', !this.checked);
@@ -105,37 +128,24 @@
 
                             const numberFormatInput = document.getElementById('numberFormatInput');
                             const numberMask = '000/000/00.0.0.0';
-                            const editableIndexes = [...numberMask]
-                                .map((char, index) => char === '0' ? index : null)
-                                .filter(index => index !== null);
+                            const editableIndexes = [...numberMask].map((char, index) => char === '0' ? index : null).filter(index => index !== null);
 
                             function normalizeNumberFormat(value) {
                                 const digits = String(value || '').replace(/\D/g, '').slice(0, editableIndexes.length);
                                 const chars = numberMask.split('');
-                                editableIndexes.forEach((position, index) => {
-                                    chars[position] = digits[index] ?? '0';
-                                });
+                                editableIndexes.forEach((position, index) => chars[position] = digits[index] ?? '0');
                                 return chars.join('');
                             }
 
                             function getEditableIndex(position, direction = 1) {
-                                if (editableIndexes.includes(position)) {
-                                    return position;
-                                }
-
-                                if (direction < 0) {
-                                    return [...editableIndexes].reverse().find(index => index < position) ?? editableIndexes[0];
-                                }
-
+                                if (editableIndexes.includes(position)) return position;
+                                if (direction < 0) return [...editableIndexes].reverse().find(index => index < position) ?? editableIndexes[0];
                                 return editableIndexes.find(index => index >= position) ?? editableIndexes[editableIndexes.length - 1];
                             }
 
                             function setNumberCaret(position, selectDigit = true) {
                                 const editablePosition = getEditableIndex(position);
-                                requestAnimationFrame(() => {
-                                    const end = selectDigit ? editablePosition + 1 : editablePosition;
-                                    numberFormatInput.setSelectionRange(editablePosition, end);
-                                });
+                                requestAnimationFrame(() => numberFormatInput.setSelectionRange(editablePosition, selectDigit ? editablePosition + 1 : editablePosition));
                             }
 
                             function setDigitAt(position, digit) {
@@ -145,96 +155,52 @@
                             }
 
                             numberFormatInput.value = normalizeNumberFormat(numberFormatInput.value);
-
-                            numberFormatInput.addEventListener('focus', function() {
-                                setNumberCaret(this.selectionStart ?? 0);
-                            });
-
-                            numberFormatInput.addEventListener('click', function() {
-                                setNumberCaret(this.selectionStart ?? 0);
-                            });
-
+                            numberFormatInput.addEventListener('focus', function() { setNumberCaret(this.selectionStart ?? 0); });
+                            numberFormatInput.addEventListener('click', function() { setNumberCaret(this.selectionStart ?? 0); });
                             numberFormatInput.addEventListener('keydown', function(event) {
                                 const key = event.key;
                                 const currentPosition = this.selectionStart ?? 0;
-
                                 if (/^\d$/.test(key)) {
                                     event.preventDefault();
                                     const position = getEditableIndex(currentPosition);
                                     setDigitAt(position, key);
-                                    const nextPosition = editableIndexes.find(index => index > position) ?? position;
-                                    setNumberCaret(nextPosition);
+                                    setNumberCaret(editableIndexes.find(index => index > position) ?? position);
                                     return;
                                 }
-
-                                if (key === 'Backspace') {
+                                if (key === 'Backspace' || key === 'Delete') {
                                     event.preventDefault();
-                                    const position = getEditableIndex(currentPosition, -1);
+                                    const position = getEditableIndex(currentPosition, key === 'Backspace' ? -1 : 1);
                                     setDigitAt(position, '0');
                                     setNumberCaret(position);
                                     return;
                                 }
-
-                                if (key === 'Delete') {
-                                    event.preventDefault();
-                                    const position = getEditableIndex(currentPosition);
-                                    setDigitAt(position, '0');
-                                    setNumberCaret(position);
-                                    return;
-                                }
-
                                 if (key === 'ArrowLeft') {
                                     event.preventDefault();
-                                    const previous = [...editableIndexes].reverse().find(index => index < currentPosition) ?? editableIndexes[0];
-                                    setNumberCaret(previous);
+                                    setNumberCaret([...editableIndexes].reverse().find(index => index < currentPosition) ?? editableIndexes[0]);
                                     return;
                                 }
-
                                 if (key === 'ArrowRight') {
                                     event.preventDefault();
-                                    const next = editableIndexes.find(index => index > currentPosition) ?? editableIndexes[editableIndexes.length - 1];
-                                    setNumberCaret(next);
+                                    setNumberCaret(editableIndexes.find(index => index > currentPosition) ?? editableIndexes[editableIndexes.length - 1]);
                                     return;
                                 }
-
-                                if (key === 'Home') {
-                                    event.preventDefault();
-                                    setNumberCaret(editableIndexes[0]);
-                                    return;
-                                }
-
-                                if (key === 'End') {
-                                    event.preventDefault();
-                                    setNumberCaret(editableIndexes[editableIndexes.length - 1]);
-                                    return;
-                                }
-
-                                if (!['Tab', 'Shift'].includes(key)) {
-                                    event.preventDefault();
-                                }
+                                if (key === 'Home') { event.preventDefault(); setNumberCaret(editableIndexes[0]); return; }
+                                if (key === 'End') { event.preventDefault(); setNumberCaret(editableIndexes[editableIndexes.length - 1]); return; }
+                                if (!['Tab', 'Shift'].includes(key)) event.preventDefault();
                             });
-
                             numberFormatInput.addEventListener('paste', function(event) {
                                 event.preventDefault();
-                                const pastedDigits = (event.clipboardData || window.clipboardData)
-                                    .getData('text')
-                                    .replace(/\D/g, '')
-                                    .slice(0, editableIndexes.length);
+                                const pastedDigits = (event.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, editableIndexes.length);
                                 const chars = normalizeNumberFormat(this.value).split('');
                                 const startPosition = getEditableIndex(this.selectionStart ?? 0);
                                 const startIndex = editableIndexes.indexOf(startPosition);
-
                                 [...pastedDigits].forEach((digit, offset) => {
                                     const targetPosition = editableIndexes[startIndex + offset];
-                                    if (targetPosition !== undefined) {
-                                        chars[targetPosition] = digit;
-                                    }
+                                    if (targetPosition !== undefined) chars[targetPosition] = digit;
                                 });
-
                                 this.value = chars.join('');
                                 setNumberCaret(editableIndexes[Math.min(startIndex + pastedDigits.length, editableIndexes.length - 1)]);
                             });
-
                             numberFormatInput.form?.addEventListener('submit', function() {
                                 numberFormatInput.value = normalizeNumberFormat(numberFormatInput.value);
                             });
@@ -242,10 +208,7 @@
 
                         <div class="flex justify-end gap-3">
                             <a href="{{ route('submissions.index') }}" class="inline-flex items-center px-5 py-2.5 rounded-xl text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 transition">Batal</a>
-                            <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition shadow-sm">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                Buat Surat
-                            </button>
+                            <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition shadow-sm">Buat Surat</button>
                         </div>
                     </form>
                 </div>

@@ -5,10 +5,21 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 
 class AdminUserController extends Controller
 {
+    private function bidangOptions(): array
+    {
+        return [
+            'PELAYANAN PENDAFTARAN PENDUDUK',
+            'PELAYANAN PENCATATAN SIPIL',
+            'PIAK',
+            'SEKRETARIATAN',
+        ];
+    }
+
     public function index()
     {
         $users = User::latest()->paginate(15);
@@ -17,7 +28,8 @@ class AdminUserController extends Controller
 
     public function create()
     {
-        return view('admin.users.create');
+        $bidangs = $this->bidangOptions();
+        return view('admin.users.create', compact('bidangs'));
     }
 
     public function store(Request $request)
@@ -27,7 +39,7 @@ class AdminUserController extends Controller
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'role' => 'required|in:user,admin',
-            'bidang' => 'nullable|string|max:100',
+            'bidang' => ['required', Rule::in($this->bidangOptions())],
         ]);
 
         User::create([
@@ -43,7 +55,8 @@ class AdminUserController extends Controller
 
     public function edit(User $user)
     {
-        return view('admin.users.edit', compact('user'));
+        $bidangs = $this->bidangOptions();
+        return view('admin.users.edit', compact('user', 'bidangs'));
     }
 
     public function update(Request $request, User $user)
@@ -52,7 +65,7 @@ class AdminUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class.',id,'.$user->id],
             'role' => 'required|in:user,admin',
-            'bidang' => 'nullable|string|max:100',
+            'bidang' => ['required', Rule::in($this->bidangOptions())],
         ]);
 
         if ($user->id === auth()->id() && $request->role !== $user->role) {
