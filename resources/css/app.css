@@ -1,3 +1,181 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    :root {
+        --sipeno-primary: 37 99 235;
+        --sipeno-ink: 15 23 42;
+        --sipeno-muted: 100 116 139;
+        --sipeno-surface: 255 255 255;
+    }
+
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        @apply min-h-screen bg-slate-50 text-slate-700 antialiased;
+        background:
+            radial-gradient(circle at top left, rgba(59, 130, 246, .18), transparent 34rem),
+            radial-gradient(circle at top right, rgba(14, 165, 233, .16), transparent 30rem),
+            linear-gradient(135deg, #f8fafc 0%, #eef5ff 45%, #f8fafc 100%);
+    }
+
+    ::selection {
+        @apply bg-blue-600 text-white;
+    }
+
+    input:not([type='checkbox']):not([type='radio']),
+    select,
+    textarea {
+        @apply border-slate-200 bg-white/90 text-slate-800 shadow-sm transition duration-200 placeholder:text-slate-400;
+    }
+
+    input:not([type='checkbox']):not([type='radio']):focus,
+    select:focus,
+    textarea:focus {
+        @apply border-blue-500 ring-4 ring-blue-100;
+    }
+
+    table {
+        @apply text-slate-700;
+    }
+
+    th {
+        @apply bg-slate-50/80 text-slate-500;
+    }
+
+    tbody tr {
+        @apply transition duration-150;
+    }
+
+    tbody tr:hover {
+        @apply bg-blue-50/40;
+    }
+}
+
+@layer components {
+    .sipeno-glass {
+        @apply border border-white/70 bg-white/85 shadow-xl shadow-slate-200/60 backdrop-blur-xl;
+    }
+
+    .sipeno-card {
+        @apply rounded-3xl border border-white/70 bg-white/90 shadow-xl shadow-slate-200/60 backdrop-blur-xl;
+    }
+
+    .sipeno-card-soft {
+        @apply rounded-2xl border border-slate-100 bg-white/90 shadow-lg shadow-slate-200/50;
+    }
+
+    .sipeno-page-wrap {
+        @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+    }
+
+    .sipeno-btn-primary {
+        @apply inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/25 transition duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-blue-500/30 focus:outline-none focus:ring-4 focus:ring-blue-200;
+    }
+
+    .sipeno-btn-secondary {
+        @apply inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700;
+    }
+
+    .sipeno-table-shell {
+        @apply overflow-hidden rounded-3xl border border-white/70 bg-white/90 shadow-xl shadow-slate-200/60 backdrop-blur-xl;
+    }
+
+    .sipeno-badge {
+        @apply inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 ring-1 ring-blue-100;
+    }
+
+    main .bg-white.rounded-2xl,
+    main .bg-white.rounded-xl {
+        @apply border-white/70 bg-white/90 shadow-xl shadow-slate-200/60 backdrop-blur-xl;
+    }
+
+    main .shadow-sm {
+        @apply shadow-lg shadow-slate-200/50;
+    }
+
+    main .border-gray-100,
+    main .border-gray-200,
+    main .divide-gray-50 > :not([hidden]) ~ :not([hidden]) {
+        @apply border-slate-100;
+    }
+
+    main .bg-gray-50,
+    main .bg-gray-50\/50,
+    main .bg-gray-100 {
+        @apply bg-slate-50/80;
+    }
+
+    main .text-gray-800 {
+        @apply text-slate-900;
+    }
+
+    main .text-gray-700,
+    main .text-gray-600 {
+        @apply text-slate-700;
+    }
+
+    main .text-gray-500,
+    main .text-gray-400 {
+        @apply text-slate-500;
+    }
+
+    main a.bg-blue-600,
+    main button.bg-blue-600,
+    main .bg-blue-600.text-white,
+    main button[type='submit'].bg-blue-600 {
+        @apply bg-gradient-to-r from-blue-600 to-cyan-500 shadow-lg shadow-blue-500/25 hover:-translate-y-0.5 hover:from-blue-700 hover:to-cyan-600 hover:shadow-xl hover:shadow-blue-500/30;
+    }
+
+    main a.text-blue-600,
+    main button.text-blue-600 {
+        @apply font-semibold text-blue-700 transition hover:text-cyan-600;
+    }
+
+    main table {
+        @apply overflow-hidden rounded-2xl;
+    }
+
+    main thead tr {
+        @apply bg-slate-50/90;
+    }
+
+    main th {
+        @apply px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500;
+    }
+
+    main td {
+        @apply px-6 py-4;
+    }
+}
+
+@layer utilities {
+    .text-balance {
+        text-wrap: balance;
+    }
+
+    .scrollbar-soft::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+
+    .scrollbar-soft::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .scrollbar-soft::-webkit-scrollbar-thumb {
+        background: rgba(148, 163, 184, .45);
+        border-radius: 999px;
+        border: 2px solid transparent;
+        background-clip: content-box;
+    }
+
+    .scrollbar-soft::-webkit-scrollbar-thumb:hover {
+        background: rgba(59, 130, 246, .55);
+        border: 2px solid transparent;
+        background-clip: content-box;
+    }
+}
