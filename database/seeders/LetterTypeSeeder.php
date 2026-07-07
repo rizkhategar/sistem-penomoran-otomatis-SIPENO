@@ -10,7 +10,7 @@ class LetterTypeSeeder extends Seeder
     public function run(): void
     {
         $types = [
-            ['name' => 'Surat Tugas dan SPPD', 'code' => 'ST-SPPD', 'bidang' => 'SEKRETARIATAN', 'description' => 'Surat tugas dan surat perintah perjalanan dinas'],
+            ['name' => 'Surat Tugas & SPPD', 'code' => 'ST-SPPD', 'bidang' => 'SEKRETARIATAN', 'description' => 'Surat tugas dan surat perintah perjalanan dinas'],
             ['name' => 'Surat Tugas', 'code' => 'ST', 'bidang' => 'SEKRETARIATAN', 'description' => 'Surat tugas'],
             ['name' => 'Nota Dinas', 'code' => 'ND', 'bidang' => 'SEKRETARIATAN', 'description' => 'Nota dinas'],
             ['name' => 'Naskah Dinas Korespondensi Internal', 'code' => 'NDKI', 'bidang' => 'SEKRETARIATAN', 'description' => 'Naskah dinas korespondensi internal'],
