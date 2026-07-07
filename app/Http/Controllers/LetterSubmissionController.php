@@ -58,6 +58,19 @@ class LetterSubmissionController extends Controller
         }
     }
 
+    private function letterTypeOrder(): array
+    {
+        return [
+            'Surat Tugas & SPPD',
+            'Surat Tugas',
+            'Nota Dinas',
+            'Naskah Dinas Korespondensi Internal',
+            'Naskah Dinas Korespondensi Eksternal',
+            'Naskah Dinas Khusus',
+            'Naskah Dinas Surat',
+        ];
+    }
+
     public function index()
     {
         $submissions = LetterSubmission::with(['user', 'letterType'])
@@ -74,12 +87,12 @@ class LetterSubmissionController extends Controller
                 ->with('error', 'Admin hanya mengelola surat yang sudah diajukan dan tidak membuat nomor surat.');
         }
 
-        $query = LetterType::where('is_active', true);
-        if (auth()->user()->bidang) {
-            $query->where('bidang', auth()->user()->bidang);
-        }
-
-        $letterTypes = $query->get();
+        $order = $this->letterTypeOrder();
+        $letterTypes = LetterType::where('is_active', true)
+            ->whereIn('name', $order)
+            ->get()
+            ->sortBy(fn ($type) => array_search($type->name, $order, true))
+            ->values();
 
         return view('submissions.create', compact('letterTypes'));
     }
