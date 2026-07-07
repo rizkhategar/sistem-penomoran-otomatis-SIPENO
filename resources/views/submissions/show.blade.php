@@ -13,7 +13,7 @@
                     @if($submission->is_sk)
                     <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 flex items-center gap-3">
                         <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-                        <span class="text-sm font-medium text-amber-700">Surat Keputusan (SK) - Berlaku mundur</span>
+                        <span class="text-sm font-medium text-amber-700">Menggunakan tanggal mundur / sisipan nomor</span>
                     </div>
                     @endif
 
@@ -39,6 +39,17 @@
                         <div class="sm:col-span-2">
                             <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Nomor Surat</p>
                             <p class="mt-1 text-lg font-bold text-blue-700">{{ $submission->letter_number }}</p>
+                            @if($submission->number_format)
+                                <p class="text-xs text-gray-400 mt-1">Format input: {{ $submission->number_format }}</p>
+                            @endif
+                        </div>
+                        <div>
+                            <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Pengolah</p>
+                            <p class="mt-1 font-medium text-gray-800">{{ $submission->pengolah ?? '-' }}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Ditujukan Kepada</p>
+                            <p class="mt-1 font-medium text-gray-800">{{ $submission->ditujukan_kepada ?? '-' }}</p>
                         </div>
                         <div class="sm:col-span-2">
                             <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Keperluan</p>
