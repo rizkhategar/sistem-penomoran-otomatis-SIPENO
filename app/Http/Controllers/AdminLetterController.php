@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\LetterSubmission;
-use Illuminate\Http\Request;
 
 class AdminLetterController extends Controller
 {
@@ -12,11 +11,22 @@ class AdminLetterController extends Controller
         $submissions = LetterSubmission::with(['user', 'letterType'])
             ->latest()
             ->paginate(15);
+
         return view('admin.submissions.index', compact('submissions'));
     }
 
     public function show(LetterSubmission $submission)
     {
+        $submission->loadMissing(['user', 'letterType']);
+
         return view('admin.submissions.show', compact('submission'));
+    }
+
+    public function destroy(LetterSubmission $submission)
+    {
+        $submission->delete();
+
+        return redirect()->route('admin.submissions.index')
+            ->with('success', 'Surat berhasil dihapus oleh admin.');
     }
 }
