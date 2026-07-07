@@ -8,6 +8,17 @@
 
     <div class="py-8">
         <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            @if($errors->any())
+                <div class="mb-6 bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-xl">
+                    <p class="font-semibold text-sm mb-2">Data belum lengkap:</p>
+                    <ul class="list-disc list-inside text-sm space-y-1">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <div class="p-6 sm:p-8">
                     <form action="{{ route('submissions.store') }}" method="POST" enctype="multipart/form-data">
@@ -25,6 +36,26 @@
                         </div>
 
                         <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Format Nomor Surat</label>
+                            <input type="text" name="number_format" value="{{ old('number_format', '470/800/00.1.2.3') }}" class="w-full border-gray-200 rounded-xl shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 px-4 py-2.5" placeholder="Contoh: 470/800/00.1.2.3" required>
+                            <p class="text-xs text-gray-400 mt-1.5">Nomor urut otomatis akan ditambahkan di depan. Contoh hasil: 001/470/800/00.1.2.3</p>
+                            @error('number_format') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Pengolah</label>
+                                <input type="text" name="pengolah" value="{{ old('pengolah') }}" class="w-full border-gray-200 rounded-xl shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 px-4 py-2.5" placeholder="Nama/staf pengolah" required>
+                                @error('pengolah') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Ditujukan Kepada</label>
+                                <input type="text" name="ditujukan_kepada" value="{{ old('ditujukan_kepada') }}" class="w-full border-gray-200 rounded-xl shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 px-4 py-2.5" placeholder="Kepada siapa surat dituju" required>
+                                @error('ditujukan_kepada') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Keperluan</label>
                             <textarea name="keperluan" rows="4" class="w-full border-gray-200 rounded-xl shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 px-4 py-2.5" placeholder="Jelaskan keperluan surat ini..." required>{{ old('keperluan') }}</textarea>
                             @error('keperluan') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
@@ -38,19 +69,21 @@
                                 <p class="text-xs text-gray-400">Format: PDF, JPG, PNG. Maks 2MB</p>
                                 <p id="fileName" class="text-sm text-blue-600 font-medium mt-2 hidden"></p>
                             </div>
-                            <input id="fileInput" type="file" name="file" class="hidden" accept=".pdf,.jpg,.jpeg,.png" onchange="document.getElementById('fileName').textContent = this.files[0].name; document.getElementById('fileName').classList.remove('hidden')">
+                            <input id="fileInput" type="file" name="file" class="hidden" accept=".pdf,.jpg,.jpeg,.png" onchange="if (this.files[0]) { document.getElementById('fileName').textContent = this.files[0].name; document.getElementById('fileName').classList.remove('hidden'); }">
                             @error('file') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
                         </div>
 
                         <div class="mb-6 p-4 bg-gray-50 rounded-xl">
                             <label class="flex items-center gap-3">
                                 <input type="checkbox" name="is_sk" value="1" {{ old('is_sk') ? 'checked' : '' }} class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500">
-                                <span class="text-sm font-medium text-gray-700">Surat Keputusan (SK) - Berlaku mundur</span>
+                                <span class="text-sm font-medium text-gray-700">Gunakan tanggal mundur / sisipan nomor</span>
                             </label>
+                            <p class="text-xs text-gray-400 mt-2">Maksimal 5 nomor sisipan mundur per tanggal.</p>
                             <div id="skDateField" class="mt-3 {{ old('is_sk') ? '' : 'hidden' }}">
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Surat</label>
-                                <input type="date" name="submission_date" value="{{ old('submission_date') }}" class="w-full border-gray-200 rounded-xl shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-white px-4 py-2.5">
+                                <input type="date" name="submission_date" value="{{ old('submission_date') }}" max="{{ now()->toDateString() }}" class="w-full border-gray-200 rounded-xl shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-white px-4 py-2.5">
                             </div>
+                            @error('submission_date') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
                         </div>
 
                         <script>
