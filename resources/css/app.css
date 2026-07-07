@@ -10,7 +10,8 @@
     input,
     select,
     textarea {
-        @apply border-slate-300 bg-white text-slate-900 shadow-sm placeholder:text-slate-400;
+        @apply border-slate-300 text-slate-900 shadow-sm placeholder:text-slate-400;
+        background-color: #ffffff;
     }
 
     input:focus,
@@ -24,11 +25,12 @@
     }
 
     th {
-        @apply bg-slate-100 text-slate-700;
+        @apply text-slate-700;
+        background-color: #f1f5f9;
     }
 
     tbody tr:hover {
-        @apply bg-blue-50;
+        background-color: #eff6ff;
     }
 }
 
@@ -37,29 +39,37 @@
     .sipeno-glass,
     .sipeno-card-soft,
     .sipeno-table-shell {
-        @apply rounded-2xl border border-slate-200 bg-white shadow-md;
+        @apply rounded-2xl border border-slate-200 shadow-md;
+        background-color: #ffffff;
     }
 
     .sipeno-btn-primary {
-        @apply inline-flex items-center justify-center gap-2 rounded-xl bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-200;
+        @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-200;
+        background-color: #1d4ed8;
     }
 
     .sipeno-btn-secondary {
-        @apply inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-800 shadow-sm hover:border-blue-300 hover:bg-blue-50 hover:text-blue-800;
+        @apply inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 px-5 py-2.5 text-sm font-semibold text-slate-800 shadow-sm hover:border-blue-300 hover:text-blue-800;
+        background-color: #ffffff;
+    }
+
+    .sipeno-btn-secondary:hover {
+        background-color: #eff6ff;
     }
 
     .sipeno-badge {
-        @apply inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-800 ring-1 ring-blue-200;
+        @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold text-blue-800 ring-1 ring-blue-200;
+        background-color: #dbeafe;
     }
 
     main .bg-white.rounded-2xl,
     main .bg-white.rounded-xl {
-        @apply border-slate-200 bg-white shadow-md;
+        @apply border-slate-200 shadow-md;
     }
 
     main .bg-gray-50,
     main .bg-gray-100 {
-        @apply bg-slate-100;
+        background-color: #f1f5f9;
     }
 
     main .text-gray-800 {
