@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div>
             <h2 class="text-xl font-bold text-gray-800">Tambah Data Bidang</h2>
-            <p class="text-sm text-gray-500 mt-0.5">Tambah bidang baru agar bisa dipakai pada akun user dan pembuatan surat</p>
+            <p class="text-sm text-gray-500 mt-0.5">Bidang baru otomatis mendapat semua jenis surat aktif</p>
         </div>
     </x-slot>
 
@@ -17,6 +17,10 @@
                     </ul>
                 </div>
             @endif
+
+            <div class="mb-6 bg-blue-50 border border-blue-100 rounded-2xl p-5 text-sm text-blue-900">
+                Setelah disimpan, bidang ini langsung mendapat semua jenis surat yang statusnya aktif. Pengaturan per bidang tetap bisa dilihat atau diubah di menu <b>Surat per Bidang</b>.
+            </div>
 
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
                 <form action="{{ route('admin.master-bidangs.store') }}" method="POST">
