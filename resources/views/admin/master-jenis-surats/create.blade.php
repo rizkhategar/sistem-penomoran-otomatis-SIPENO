@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div>
             <h2 class="text-xl font-bold text-gray-800">Tambah Data Jenis Surat</h2>
-            <p class="text-sm text-gray-500 mt-0.5">Tambah jenis surat baru agar bisa dipasangkan ke bidang</p>
+            <p class="text-sm text-gray-500 mt-0.5">Jenis surat baru otomatis tersedia untuk semua bidang aktif</p>
         </div>
     </x-slot>
 
@@ -17,6 +17,10 @@
                     </ul>
                 </div>
             @endif
+
+            <div class="mb-6 bg-blue-50 border border-blue-100 rounded-2xl p-5 text-sm text-blue-900">
+                Setelah disimpan, jenis surat ini langsung bisa dipakai oleh semua bidang yang statusnya aktif. Pengaturan per bidang tetap bisa dilihat atau diubah di menu <b>Surat per Bidang</b>.
+            </div>
 
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
                 <form action="{{ route('admin.master-jenis-surats.store') }}" method="POST">
