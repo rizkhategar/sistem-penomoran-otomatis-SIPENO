@@ -37,7 +37,7 @@ class MasterJenisSuratController extends Controller
             'is_active' => true,
         ]);
 
-        return redirect()->route('admin.master-jenis-surats.index')->with('success', 'Master jenis surat berhasil ditambahkan.');
+        return redirect()->route('admin.master-jenis-surats.index')->with('success', 'Data jenis surat berhasil ditambahkan.');
     }
 
     public function edit(MasterJenisSurat $masterJenisSurat)
@@ -61,17 +61,17 @@ class MasterJenisSuratController extends Controller
             'is_active' => $request->boolean('is_active'),
         ]);
 
-        return redirect()->route('admin.master-jenis-surats.index')->with('success', 'Master jenis surat berhasil diupdate.');
+        return redirect()->route('admin.master-jenis-surats.index')->with('success', 'Data jenis surat berhasil diupdate.');
     }
 
     public function destroy(MasterJenisSurat $masterJenisSurat)
     {
         if ($masterJenisSurat->letterTypes()->exists()) {
-            return back()->with('error', 'Jenis surat tidak bisa dihapus karena sudah dipakai pada relasi jenis surat. Nonaktifkan saja jika tidak digunakan lagi.');
+            return back()->with('error', 'Jenis surat tidak bisa dihapus karena sudah dipakai pada surat per bidang. Nonaktifkan saja jika tidak digunakan lagi.');
         }
 
         $masterJenisSurat->delete();
 
-        return redirect()->route('admin.master-jenis-surats.index')->with('success', 'Master jenis surat berhasil dihapus.');
+        return redirect()->route('admin.master-jenis-surats.index')->with('success', 'Data jenis surat berhasil dihapus.');
     }
 }

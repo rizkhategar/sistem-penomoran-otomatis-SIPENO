@@ -1,8 +1,8 @@
 <x-app-layout>
     <x-slot name="header">
         <div>
-            <h2 class="text-xl font-bold text-gray-800">Tambah Master Bidang</h2>
-            <p class="text-sm text-gray-500 mt-0.5">Tambah bidang baru agar bisa dipakai pada user dan jenis surat</p>
+            <h2 class="text-xl font-bold text-gray-800">Tambah Data Bidang</h2>
+            <p class="text-sm text-gray-500 mt-0.5">Tambah bidang baru agar bisa dipakai pada akun user dan pembuatan surat</p>
         </div>
     </x-slot>
 

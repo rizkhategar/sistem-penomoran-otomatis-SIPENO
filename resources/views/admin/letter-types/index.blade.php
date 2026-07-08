@@ -2,12 +2,12 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <div>
-                <h2 class="text-xl font-bold text-gray-800">Jenis Surat</h2>
-                <p class="text-sm text-gray-500 mt-0.5">Kelola relasi master bidang dan master jenis surat</p>
+                <h2 class="text-xl font-bold text-gray-800">Surat per Bidang</h2>
+                <p class="text-sm text-gray-500 mt-0.5">Atur jenis surat apa saja yang tersedia pada setiap bidang.</p>
             </div>
             <a href="{{ route('admin.letter-types.create') }}" class="inline-flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl hover:bg-blue-700 transition shadow-sm text-sm font-medium">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                Tambah Baru
+                Pasangkan Surat
             </a>
         </div>
     </x-slot>
@@ -27,6 +27,11 @@
                 </div>
             @endif
 
+            <div class="mb-6 bg-blue-50 border border-blue-100 rounded-2xl p-5 text-sm text-blue-900">
+                <p class="font-semibold mb-2">Cara mengaturnya:</p>
+                <p>Isi dulu daftar <b>Data Bidang</b> dan <b>Data Jenis Surat</b>. Setelah itu buka halaman ini untuk memasangkan satu bidang dengan satu jenis surat. Pasangan inilah yang akan muncul di form <b>Buat Surat</b>.</p>
+            </div>
+
             <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 @forelse($letterTypes as $type)
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition">
@@ -39,7 +44,7 @@
                             <a href="{{ route('admin.letter-types.edit', $type) }}" class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-blue-600 transition">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                             </a>
-                            <form action="{{ route('admin.letter-types.destroy', $type) }}" method="POST" onsubmit="return confirm('Hapus jenis surat ini?')">
+                            <form action="{{ route('admin.letter-types.destroy', $type) }}" method="POST" onsubmit="return confirm('Hapus pengaturan surat ini?')">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-red-600 transition">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
@@ -62,9 +67,9 @@
                 @empty
                 <div class="sm:col-span-2 lg:col-span-3 text-center py-16">
                     <svg class="w-14 h-14 mx-auto mb-4 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    <p class="text-gray-400 font-medium mb-1">Belum ada jenis surat</p>
-                    <p class="text-gray-400 text-sm mb-4">Tambah relasi bidang dan jenis surat agar user bisa membuat surat.</p>
-                    <a href="{{ route('admin.letter-types.create') }}" class="inline-flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl hover:bg-blue-700 transition text-sm font-medium shadow-sm">Tambah Sekarang</a>
+                    <p class="text-gray-400 font-medium mb-1">Belum ada surat yang dipasangkan ke bidang</p>
+                    <p class="text-gray-400 text-sm mb-4">Tambahkan pasangan bidang dan jenis surat agar user bisa membuat surat.</p>
+                    <a href="{{ route('admin.letter-types.create') }}" class="inline-flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl hover:bg-blue-700 transition text-sm font-medium shadow-sm">Pasangkan Sekarang</a>
                 </div>
                 @endforelse
             </div>

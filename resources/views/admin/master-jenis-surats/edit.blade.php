@@ -1,8 +1,8 @@
 <x-app-layout>
     <x-slot name="header">
         <div>
-            <h2 class="text-xl font-bold text-gray-800">Edit Master Jenis Surat</h2>
-            <p class="text-sm text-gray-500 mt-0.5">Ubah data jenis surat dasar</p>
+            <h2 class="text-xl font-bold text-gray-800">Edit Data Jenis Surat</h2>
+            <p class="text-sm text-gray-500 mt-0.5">Ubah data jenis surat</p>
         </div>
     </x-slot>
 

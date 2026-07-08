@@ -2,11 +2,11 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <div>
-                <h2 class="text-xl font-bold text-gray-800">Master Jenis Surat</h2>
-                <p class="text-sm text-gray-500 mt-0.5">Kelola daftar jenis surat dasar</p>
+                <h2 class="text-xl font-bold text-gray-800">Data Jenis Surat</h2>
+                <p class="text-sm text-gray-500 mt-0.5">Kelola daftar jenis surat yang dapat dipakai pada pembuatan surat</p>
             </div>
             <a href="{{ route('admin.master-jenis-surats.create') }}" class="inline-flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl hover:bg-blue-700 transition shadow-sm text-sm font-medium">
-                Tambah Jenis
+                Tambah Jenis Surat
             </a>
         </div>
     </x-slot>
@@ -28,7 +28,7 @@
                                 <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Kode</th>
                                 <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Jenis Surat</th>
                                 <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Deskripsi</th>
-                                <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Relasi</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Dipakai Pada</th>
                                 <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
                                 <th class="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Aksi</th>
                             </tr>
@@ -57,7 +57,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="px-6 py-12 text-center text-gray-400">Belum ada master jenis surat.</td>
+                                    <td colspan="6" class="px-6 py-12 text-center text-gray-400">Belum ada data jenis surat.</td>
                                 </tr>
                             @endforelse
                         </tbody>

@@ -35,13 +35,13 @@
                                     {{ __('Kelola Surat') }}
                                 </x-nav-link>
                                 <x-nav-link :href="route('admin.master-bidangs.index')" :active="request()->routeIs('admin.master-bidangs.*')">
-                                    {{ __('Master Bidang') }}
+                                    {{ __('Data Bidang') }}
                                 </x-nav-link>
                                 <x-nav-link :href="route('admin.master-jenis-surats.index')" :active="request()->routeIs('admin.master-jenis-surats.*')">
-                                    {{ __('Master Jenis') }}
+                                    {{ __('Data Jenis Surat') }}
                                 </x-nav-link>
                                 <x-nav-link :href="route('admin.letter-types.index')" :active="request()->routeIs('admin.letter-types.*')">
-                                    {{ __('Jenis Surat') }}
+                                    {{ __('Surat per Bidang') }}
                                 </x-nav-link>
                                 <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
                                     {{ __('User') }}
@@ -170,9 +170,9 @@
                     @auth
                         @if(Auth::user()->isAdmin())
                             <x-responsive-nav-link :href="route('admin.submissions.index')" :active="request()->routeIs('admin.submissions.*')">{{ __('Kelola Surat') }}</x-responsive-nav-link>
-                            <x-responsive-nav-link :href="route('admin.master-bidangs.index')" :active="request()->routeIs('admin.master-bidangs.*')">{{ __('Master Bidang') }}</x-responsive-nav-link>
-                            <x-responsive-nav-link :href="route('admin.master-jenis-surats.index')" :active="request()->routeIs('admin.master-jenis-surats.*')">{{ __('Master Jenis') }}</x-responsive-nav-link>
-                            <x-responsive-nav-link :href="route('admin.letter-types.index')" :active="request()->routeIs('admin.letter-types.*')">{{ __('Jenis Surat') }}</x-responsive-nav-link>
+                            <x-responsive-nav-link :href="route('admin.master-bidangs.index')" :active="request()->routeIs('admin.master-bidangs.*')">{{ __('Data Bidang') }}</x-responsive-nav-link>
+                            <x-responsive-nav-link :href="route('admin.master-jenis-surats.index')" :active="request()->routeIs('admin.master-jenis-surats.*')">{{ __('Data Jenis Surat') }}</x-responsive-nav-link>
+                            <x-responsive-nav-link :href="route('admin.letter-types.index')" :active="request()->routeIs('admin.letter-types.*')">{{ __('Surat per Bidang') }}</x-responsive-nav-link>
                             <x-responsive-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">{{ __('User') }}</x-responsive-nav-link>
                         @else
                             <x-responsive-nav-link :href="route('submissions.create')" :active="request()->routeIs('submissions.create')">{{ __('Buat Surat') }}</x-responsive-nav-link>

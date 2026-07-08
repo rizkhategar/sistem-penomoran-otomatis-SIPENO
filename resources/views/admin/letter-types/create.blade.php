@@ -1,8 +1,8 @@
 <x-app-layout>
     <x-slot name="header">
         <div>
-            <h2 class="text-xl font-bold text-gray-800">Tambah Jenis Surat</h2>
-            <p class="text-sm text-gray-500 mt-0.5">Pilih bidang dan jenis surat dari master data</p>
+            <h2 class="text-xl font-bold text-gray-800">Pasangkan Surat ke Bidang</h2>
+            <p class="text-sm text-gray-500 mt-0.5">Pilih bidang, lalu pilih jenis surat yang boleh dibuat oleh bidang tersebut.</p>
         </div>
     </x-slot>
 
@@ -18,6 +18,10 @@
                     </ul>
                 </div>
             @endif
+
+            <div class="mb-6 bg-blue-50 border border-blue-100 rounded-2xl p-5 text-sm text-blue-900">
+                <p>Contoh: bidang <b>PIAK</b> dipasangkan dengan jenis surat <b>Nota Dinas</b>. Setelah disimpan, user bidang PIAK bisa memilih Nota Dinas pada form Buat Surat.</p>
+            </div>
 
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <div class="p-6 sm:p-8">
@@ -43,13 +47,13 @@
                                     <option value="{{ $jenisSurat->id }}" {{ old('master_jenis_surat_id') == $jenisSurat->id ? 'selected' : '' }}>{{ $jenisSurat->name }}</option>
                                 @endforeach
                             </select>
-                            <p class="text-xs text-gray-400 mt-1.5">Data bidang dan jenis surat berasal dari master data, sehingga tidak perlu mengetik ulang.</p>
+                            <p class="text-xs text-gray-400 mt-1.5">Kalau pilihan belum ada, tambahkan dulu di menu Data Bidang atau Data Jenis Surat.</p>
                             @error('master_jenis_surat_id') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
                         </div>
 
                         <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi <span class="text-gray-400">(opsional)</span></label>
-                            <textarea name="description" rows="3" class="w-full border-gray-200 rounded-xl shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 px-4 py-2.5" placeholder="Kosongkan jika memakai deskripsi dari master jenis surat">{{ old('description') }}</textarea>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Catatan <span class="text-gray-400">(opsional)</span></label>
+                            <textarea name="description" rows="3" class="w-full border-gray-200 rounded-xl shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 px-4 py-2.5" placeholder="Kosongkan jika tidak ada catatan tambahan">{{ old('description') }}</textarea>
                             @error('description') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
                         </div>
 
