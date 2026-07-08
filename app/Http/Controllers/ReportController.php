@@ -164,15 +164,23 @@ class ReportController extends Controller
         $nextObject = 5;
         $pageWidth = 842;
         $pageHeight = 595;
+        $logoObjectId = null;
+        $logoObject = $this->buildLogoImageObject();
+
+        if ($logoObject !== null) {
+            $logoObjectId = $nextObject++;
+            $objects[$logoObjectId] = $logoObject;
+        }
 
         foreach ($pages as $pageIndex => $rows) {
             $contentObject = $nextObject++;
             $pageObject = $nextObject++;
             $kids[] = $pageObject.' 0 R';
-            $stream = $this->pageStream($rows, $pageIndex + 1, count($pages), $context);
+            $stream = $this->pageStream($rows, $pageIndex + 1, count($pages), $context, $logoObjectId !== null);
+            $xObjectResource = $logoObjectId !== null ? ' /XObject << /Logo '.$logoObjectId.' 0 R >>' : '';
 
             $objects[$contentObject] = "<< /Length ".strlen($stream)." >>\nstream\n{$stream}\nendstream";
-            $objects[$pageObject] = "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 {$pageWidth} {$pageHeight}] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents {$contentObject} 0 R >>";
+            $objects[$pageObject] = "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 {$pageWidth} {$pageHeight}] /Resources << /Font << /F1 3 0 R /F2 4 0 R >>{$xObjectResource} >> /Contents {$contentObject} 0 R >>";
         }
 
         $objects[2] = '<< /Type /Pages /Kids ['.implode(' ', $kids).'] /Count '.count($kids).' >>';
@@ -200,10 +208,49 @@ class ReportController extends Controller
         return $pdf;
     }
 
-    private function pageStream(array $rows, int $page, int $totalPages, array $context): string
+    private function buildLogoImageObject(): ?string
+    {
+        $path = public_path('images/logo.png');
+
+        if (!is_file($path) || !function_exists('imagecreatefrompng')) {
+            return null;
+        }
+
+        $image = @imagecreatefrompng($path);
+        if (!$image) {
+            return null;
+        }
+
+        $width = imagesx($image);
+        $height = imagesy($image);
+        $rgb = '';
+
+        for ($y = 0; $y < $height; $y++) {
+            for ($x = 0; $x < $width; $x++) {
+                $rgba = imagecolorat($image, $x, $y);
+                $colors = imagecolorsforindex($image, $rgba);
+                $alpha = ($colors['alpha'] ?? 0) / 127;
+                $red = (int) round((1 - $alpha) * $colors['red'] + $alpha * 255);
+                $green = (int) round((1 - $alpha) * $colors['green'] + $alpha * 255);
+                $blue = (int) round((1 - $alpha) * $colors['blue'] + $alpha * 255);
+                $rgb .= chr($red).chr($green).chr($blue);
+            }
+        }
+
+        imagedestroy($image);
+        $compressed = gzcompress($rgb);
+
+        if ($compressed === false) {
+            return null;
+        }
+
+        return "<< /Type /XObject /Subtype /Image /Width {$width} /Height {$height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /FlateDecode /Length ".strlen($compressed)." >>\nstream\n{$compressed}\nendstream";
+    }
+
+    private function pageStream(array $rows, int $page, int $totalPages, array $context, bool $hasLogo): string
     {
         $stream = '';
-        $stream .= $this->drawHeader();
+        $stream .= $this->drawHeader($hasLogo);
         $stream .= $this->drawReportInfo($context);
         $stream .= $this->drawTable($rows);
 
@@ -213,21 +260,23 @@ class ReportController extends Controller
         return $stream;
     }
 
-    private function drawHeader(): string
+    private function drawHeader(bool $hasLogo): string
     {
         $stream = '';
         $stream .= $this->fillRect(36, 510, 770, 56, [0.93, 0.96, 1.00]);
         $stream .= $this->strokeRect(36, 510, 770, 56, [0.78, 0.84, 0.94]);
 
-        // Logo mark SIPENO.
-        $stream .= $this->fillRect(50, 522, 34, 34, [0.12, 0.28, 0.63]);
-        $stream .= $this->drawText('S', 62, 534, 18, 'F2', [1, 1, 1]);
+        if ($hasLogo) {
+            $stream .= "q 42 0 0 42 48 517 cm /Logo Do Q\n";
+        } else {
+            $stream .= $this->fillRect(50, 522, 34, 34, [0.12, 0.28, 0.63]);
+            $stream .= $this->drawText('S', 62, 534, 18, 'F2', [1, 1, 1]);
+        }
+
         $stream .= $this->drawText('SIPENO DISDUKCAPIL', 98, 546, 16, 'F2', [0.08, 0.12, 0.20]);
         $stream .= $this->drawText('Sistem Penomoran Surat Dinas', 98, 532, 9, 'F1', [0.25, 0.31, 0.40]);
         $stream .= $this->drawText('Laporan resmi pengajuan dan penomoran surat bulanan', 98, 520, 8, 'F1', [0.39, 0.45, 0.55]);
-
-        $stream .= $this->drawText('LAPORAN BULANAN', 664, 543, 12, 'F2', [0.12, 0.28, 0.63]);
-        $stream .= $this->drawText('Nomor Surat', 704, 529, 8, 'F1', [0.39, 0.45, 0.55]);
+        $stream .= $this->drawText('LAPORAN BULANAN', 664, 536, 12, 'F2', [0.12, 0.28, 0.63]);
         $stream .= $this->line(36, 500, 806, 500, [0.12, 0.28, 0.63], 1.2);
 
         return $stream;
@@ -238,13 +287,10 @@ class ReportController extends Controller
         $stream = '';
         $stream .= $this->fillRect(36, 450, 770, 36, [1, 1, 1]);
         $stream .= $this->strokeRect(36, 450, 770, 36, [0.88, 0.91, 0.95]);
-
         $stream .= $this->drawText('Periode', 52, 472, 8, 'F2', [0.39, 0.45, 0.55]);
         $stream .= $this->drawText($context['periode'], 52, 458, 11, 'F2', [0.08, 0.12, 0.20]);
-
         $stream .= $this->drawText('Bidang', 208, 472, 8, 'F2', [0.39, 0.45, 0.55]);
         $stream .= $this->drawText($this->fitText($context['bidang'], 42), 208, 458, 11, 'F2', [0.08, 0.12, 0.20]);
-
         $stream .= $this->drawText('Total Surat', 520, 472, 8, 'F2', [0.39, 0.45, 0.55]);
         $stream .= $this->drawText((string) $context['total'].' surat', 520, 458, 11, 'F2', [0.08, 0.12, 0.20]);
 
