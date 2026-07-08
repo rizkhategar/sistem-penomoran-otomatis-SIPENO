@@ -35,7 +35,7 @@ class MasterBidangController extends Controller
             'is_active' => true,
         ]);
 
-        return redirect()->route('admin.master-bidangs.index')->with('success', 'Master bidang berhasil ditambahkan.');
+        return redirect()->route('admin.master-bidangs.index')->with('success', 'Data bidang berhasil ditambahkan.');
     }
 
     public function edit(MasterBidang $masterBidang)
@@ -57,17 +57,17 @@ class MasterBidangController extends Controller
             'is_active' => $request->boolean('is_active'),
         ]);
 
-        return redirect()->route('admin.master-bidangs.index')->with('success', 'Master bidang berhasil diupdate.');
+        return redirect()->route('admin.master-bidangs.index')->with('success', 'Data bidang berhasil diupdate.');
     }
 
     public function destroy(MasterBidang $masterBidang)
     {
         if ($masterBidang->letterTypes()->exists()) {
-            return back()->with('error', 'Bidang tidak bisa dihapus karena sudah dipakai pada jenis surat. Nonaktifkan saja jika tidak digunakan lagi.');
+            return back()->with('error', 'Bidang tidak bisa dihapus karena sudah dipakai pada surat per bidang. Nonaktifkan saja jika tidak digunakan lagi.');
         }
 
         $masterBidang->delete();
 
-        return redirect()->route('admin.master-bidangs.index')->with('success', 'Master bidang berhasil dihapus.');
+        return redirect()->route('admin.master-bidangs.index')->with('success', 'Data bidang berhasil dihapus.');
     }
 }
