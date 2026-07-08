@@ -2,8 +2,8 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <div>
-                <h2 class="text-xl font-bold text-gray-800">Master Bidang</h2>
-                <p class="text-sm text-gray-500 mt-0.5">Kelola daftar bidang yang dipakai di user dan surat</p>
+                <h2 class="text-xl font-bold text-gray-800">Data Bidang</h2>
+                <p class="text-sm text-gray-500 mt-0.5">Kelola daftar bidang yang dipakai pada akun user dan pembuatan surat</p>
             </div>
             <a href="{{ route('admin.master-bidangs.create') }}" class="inline-flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl hover:bg-blue-700 transition shadow-sm text-sm font-medium">
                 Tambah Bidang
@@ -27,7 +27,7 @@
                             <tr>
                                 <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Kode</th>
                                 <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Nama Bidang</th>
-                                <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Relasi</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Dipakai Pada</th>
                                 <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
                                 <th class="px-5 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Aksi</th>
                             </tr>
@@ -55,7 +55,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="px-6 py-12 text-center text-gray-400">Belum ada master bidang.</td>
+                                    <td colspan="5" class="px-6 py-12 text-center text-gray-400">Belum ada data bidang.</td>
                                 </tr>
                             @endforelse
                         </tbody>
