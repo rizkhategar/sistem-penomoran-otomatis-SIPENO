@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\LetterGlobalSequence;
+use App\Models\LetterDailySequence;
 use App\Models\LetterSubmission;
 use App\Models\LetterType;
 use Carbon\Carbon;
@@ -13,50 +13,64 @@ use Illuminate\Validation\ValidationException;
 
 class LetterSubmissionController extends Controller
 {
-    private function generateLetterNumber(string $numberFormat, Carbon $date): string
+    private const DEFAULT_DAILY_INSERTION_LIMIT = 5;
+
+    private function generateLetterNumber(string $numberFormat, Carbon $date, bool $isInsertion, int $dailyInsertionLimit): string
     {
-        return DB::transaction(function () use ($numberFormat, $date) {
-            $month = (int) $date->format('n');
-            $year = (int) $date->format('Y');
+        return DB::transaction(function () use ($numberFormat, $date, $isInsertion, $dailyInsertionLimit) {
+            $sequence = $this->getOrCreateDailySequence($date, $dailyInsertionLimit);
 
-            $sequence = LetterGlobalSequence::where('month', $month)
-                ->where('year', $year)
-                ->lockForUpdate()
-                ->first();
+            if ($isInsertion) {
+                if ($sequence->insertion_used >= $dailyInsertionLimit) {
+                    throw ValidationException::withMessages([
+                        'submission_date' => 'Kuota sisipan nomor untuk tanggal '.$date->format('d/m/Y').' sudah penuh. Maksimal '.$dailyInsertionLimit.' nomor per hari.',
+                    ]);
+                }
 
-            if (!$sequence) {
-                $sequence = LetterGlobalSequence::create([
-                    'month' => $month,
-                    'year' => $year,
-                    'last_number' => 0,
-                ]);
+                $sequence->insertion_used = $sequence->insertion_used + 1;
+                $sequence->save();
+
+                $nextNumber = $sequence->last_regular_number + $sequence->insertion_used;
+            } else {
+                $sequence->last_regular_number = $sequence->last_regular_number + 1;
+                $sequence->save();
+
+                $nextNumber = $sequence->last_regular_number;
             }
 
-            $sequence->last_number = $sequence->last_number + 1;
-            $sequence->save();
-
-            $number = str_pad((string) $sequence->last_number, 3, '0', STR_PAD_LEFT);
+            $number = str_pad((string) $nextNumber, 3, '0', STR_PAD_LEFT);
             $format = trim($numberFormat, " /\t\n\r\0\x0B");
 
             return "{$number}/{$format}";
         });
     }
 
-    private function ensureBackdatedQuotaAvailable(Carbon $date): void
+    private function getOrCreateDailySequence(Carbon $date, int $dailyInsertionLimit): LetterDailySequence
     {
-        if ($date->isToday() || $date->greaterThan(today())) {
-            return;
+        $dateString = $date->toDateString();
+
+        $sequence = LetterDailySequence::whereDate('sequence_date', $dateString)
+            ->lockForUpdate()
+            ->first();
+
+        if ($sequence) {
+            return $sequence;
         }
 
-        $used = LetterSubmission::whereDate('submission_date', $date->toDateString())
-            ->whereDate('created_at', '>', $date->toDateString())
-            ->count();
+        $previous = LetterDailySequence::whereDate('sequence_date', '<', $dateString)
+            ->orderByDesc('sequence_date')
+            ->lockForUpdate()
+            ->first();
 
-        if ($used >= 5) {
-            throw ValidationException::withMessages([
-                'submission_date' => 'Kuota sisipan nomor mundur untuk tanggal '.$date->format('d/m/Y').' sudah penuh. Maksimal 5 nomor per hari.',
-            ]);
-        }
+        $startingNumber = $previous
+            ? $previous->last_regular_number + $dailyInsertionLimit
+            : 0;
+
+        return LetterDailySequence::create([
+            'sequence_date' => $dateString,
+            'last_regular_number' => $startingNumber,
+            'insertion_used' => 0,
+        ]);
     }
 
     private function bidangOptions(): array
@@ -138,12 +152,13 @@ class LetterSubmissionController extends Controller
             ]);
         }
 
-        $date = ($request->boolean('is_sk') && $request->submission_date)
-            ? Carbon::parse($request->submission_date)
-            : now();
+        $isInsertion = $request->boolean('is_sk') && $request->filled('submission_date');
+        $date = $isInsertion
+            ? Carbon::parse($request->submission_date, 'Asia/Jakarta')
+            : now('Asia/Jakarta');
 
-        $this->ensureBackdatedQuotaAvailable($date);
-        $letterNumber = $this->generateLetterNumber($request->number_format, $date);
+        $dailyInsertionLimit = (int) ($letterType->daily_insertion ?: self::DEFAULT_DAILY_INSERTION_LIMIT);
+        $letterNumber = $this->generateLetterNumber($request->number_format, $date, $isInsertion, $dailyInsertionLimit);
 
         $filePath = null;
         if ($request->hasFile('file')) {
@@ -160,9 +175,9 @@ class LetterSubmissionController extends Controller
             'file_path' => $filePath,
             'status' => 'approved',
             'letter_number' => $letterNumber,
-            'approved_at' => now(),
+            'approved_at' => now('Asia/Jakarta'),
             'approved_by' => auth()->id(),
-            'is_sk' => $request->boolean('is_sk'),
+            'is_sk' => $isInsertion,
             'submission_date' => $date,
         ]);
 

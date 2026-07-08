@@ -3,7 +3,7 @@
         <div class="flex justify-between items-center">
             <div>
                 <h2 class="text-xl font-bold text-gray-800">Jenis Surat</h2>
-                <p class="text-sm text-gray-500 mt-0.5">Kelola jenis surat yang dapat dibuat</p>
+                <p class="text-sm text-gray-500 mt-0.5">Kelola relasi master bidang dan master jenis surat</p>
             </div>
             <a href="{{ route('admin.letter-types.create') }}" class="inline-flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl hover:bg-blue-700 transition shadow-sm text-sm font-medium">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -33,7 +33,7 @@
                     <div class="flex items-start justify-between mb-3">
                         <div>
                             <span class="inline-block px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg text-xs font-mono font-bold">{{ $type->code }}</span>
-                            <h3 class="font-semibold text-gray-800 mt-2">{{ $type->name }}</h3>
+                            <h3 class="font-semibold text-gray-800 mt-2">{{ $type->masterJenisSurat->name ?? $type->name }}</h3>
                         </div>
                         <div class="flex gap-1">
                             <a href="{{ route('admin.letter-types.edit', $type) }}" class="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-blue-600 transition">
@@ -51,8 +51,9 @@
                         <p class="text-sm text-gray-500">{{ $type->description }}</p>
                     @endif
                     <div class="mt-3 flex items-center gap-2 text-xs text-gray-400 flex-wrap">
-                        <span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{{ $type->bidang ?? 'Umum' }}</span>
+                        <span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{{ $type->masterBidang->name ?? $type->bidang ?? 'Umum' }}</span>
                         <span>{{ $type->submissions()->count() }} surat</span>
+                        <span>Sisipan {{ $type->daily_insertion ?? 5 }}/hari</span>
                         @if(!$type->is_active)
                             <span class="bg-red-50 text-red-600 px-2 py-0.5 rounded-full">Nonaktif</span>
                         @endif
@@ -62,7 +63,7 @@
                 <div class="sm:col-span-2 lg:col-span-3 text-center py-16">
                     <svg class="w-14 h-14 mx-auto mb-4 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     <p class="text-gray-400 font-medium mb-1">Belum ada jenis surat</p>
-                    <p class="text-gray-400 text-sm mb-4">Tambah jenis surat agar user bisa membuat surat.</p>
+                    <p class="text-gray-400 text-sm mb-4">Tambah relasi bidang dan jenis surat agar user bisa membuat surat.</p>
                     <a href="{{ route('admin.letter-types.create') }}" class="inline-flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl hover:bg-blue-700 transition text-sm font-medium shadow-sm">Tambah Sekarang</a>
                 </div>
                 @endforelse
