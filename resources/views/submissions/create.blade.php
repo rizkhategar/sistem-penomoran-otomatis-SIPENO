@@ -54,11 +54,9 @@
                                 name="number_format"
                                 value="{{ old('number_format') }}"
                                 class="w-full border-gray-200 rounded-xl shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 px-4 py-2.5"
-                                placeholder="Contoh: 470/800/00.1.2.3"
                                 autocomplete="off"
                                 required
                             >
-                            <p class="text-xs text-gray-400 mt-1.5">Isi manual sesuai format yang dibutuhkan. Contoh hasil nomor: 001/470/800/00.1.2.3</p>
                             @error('number_format') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
                         </div>
 
