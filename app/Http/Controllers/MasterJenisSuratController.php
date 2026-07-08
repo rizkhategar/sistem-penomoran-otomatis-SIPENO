@@ -12,6 +12,8 @@ class MasterJenisSuratController extends Controller
 {
     public function index()
     {
+        $this->syncAllActiveJenisSuratToActiveBidangs();
+
         $jenisSurats = MasterJenisSurat::withCount('letterTypes')
             ->orderBy('name')
             ->paginate(15);
@@ -84,12 +86,19 @@ class MasterJenisSuratController extends Controller
         return redirect()->route('admin.master-jenis-surats.index')->with('success', 'Data jenis surat berhasil dihapus.');
     }
 
+    private function syncAllActiveJenisSuratToActiveBidangs(): void
+    {
+        MasterJenisSurat::where('is_active', true)->get()->each(function (MasterJenisSurat $jenisSurat) {
+            $this->makeAvailableForAllActiveBidangs($jenisSurat);
+        });
+    }
+
     private function makeAvailableForAllActiveBidangs(MasterJenisSurat $jenisSurat): int
     {
         $count = 0;
 
         MasterBidang::where('is_active', true)->get()->each(function (MasterBidang $bidang) use ($jenisSurat, &$count) {
-            $letterType = LetterType::updateOrCreate(
+            $letterType = LetterType::firstOrCreate(
                 [
                     'master_bidang_id' => $bidang->id,
                     'master_jenis_surat_id' => $jenisSurat->id,
