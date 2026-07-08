@@ -16,6 +16,16 @@ class ReportController extends Controller
         return ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
     }
 
+    private function officialBidangs(): array
+    {
+        return [
+            'PELAYANAN PENDAFTARAN PENDUDUK',
+            'PELAYANAN PENCATATAN SIPIL',
+            'PIAK',
+            'SEKRETARIATAN',
+        ];
+    }
+
     private function applyReportFilters(Builder $query, int $bulan, int $tahun, ?string $bidang): Builder
     {
         $query->whereRaw('YEAR(COALESCE(submission_date, created_at)) = ?', [$tahun])
@@ -52,7 +62,7 @@ class ReportController extends Controller
             ->with('letterType')
             ->get();
 
-        $bidangs = collect(['UMUM', 'PERENCANAAN', 'SEKRETARIATAN'])
+        $bidangs = collect($this->officialBidangs())
             ->merge(User::whereNotNull('bidang')->pluck('bidang'))
             ->merge(LetterType::whereNotNull('bidang')->pluck('bidang'))
             ->filter()
@@ -106,115 +116,63 @@ class ReportController extends Controller
 
     private function buildMonthlyReportPdf($submissions, $perJenis, int $bulan, int $tahun, ?string $bidang, array $months): string
     {
-        $lines = [
-            'LAPORAN SURAT BULANAN',
-            'Periode : '.$months[$bulan - 1].' '.$tahun,
-            'Bidang  : '.($bidang ?: 'Semua Bidang'),
-            'Total   : '.$submissions->count().' surat',
-            '',
-            'Rekap per jenis surat:',
-        ];
-
-        if ($perJenis->isEmpty()) {
-            $lines[] = '- Tidak ada data';
-        } else {
-            foreach ($perJenis as $item) {
-                $lines[] = '- '.($item->letterType->name ?? 'Jenis tidak ditemukan').' ('.($item->letterType->bidang ?? '-').'): '.$item->total;
-            }
-        }
-
-        $lines[] = '';
-        $lines[] = str_repeat('-', 150);
-        $lines[] = $this->rowLine(['No', 'Tanggal', 'Nomor Surat', 'Pembuat', 'Bidang', 'Jenis', 'Pengolah', 'Ditujukan Kepada']);
-        $lines[] = str_repeat('-', 150);
-
-        foreach ($submissions as $index => $submission) {
+        $rows = $submissions->map(function ($submission, int $index) {
             $date = $submission->submission_date ?: $submission->created_at;
-            $lines[] = $this->rowLine([
+
+            return [
                 (string) ($index + 1),
                 $date?->format('d/m/Y') ?? '-',
-                $submission->letter_number,
+                $submission->letter_number ?: '-',
                 $submission->user->name ?? '-',
                 $submission->letterType->bidang ?? '-',
                 $submission->letterType->name ?? '-',
                 $submission->pengolah ?? '-',
                 $submission->ditujukan_kepada ?? '-',
-            ]);
+            ];
+        })->values()->all();
+
+        $rekapJenis = $perJenis->map(function ($item) {
+            return ($item->letterType->name ?? 'Jenis tidak ditemukan').' = '.$item->total;
+        })->values()->all();
+
+        $context = [
+            'periode' => $months[$bulan - 1].' '.$tahun,
+            'bidang' => $bidang ?: 'Semua Bidang',
+            'total' => $submissions->count(),
+            'printed_at' => now()->format('d/m/Y H:i'),
+            'rekap_jenis' => $rekapJenis,
+        ];
+
+        $pages = array_chunk($rows, 18);
+        if ($pages === []) {
+            $pages = [[]];
         }
 
-        if ($submissions->isEmpty()) {
-            $lines[] = 'Tidak ada data surat pada periode ini.';
-        }
-
-        return $this->makePdf($this->chunkLinesForPdf($lines));
+        return $this->makePdf($pages, $context);
     }
 
-    private function rowLine(array $values): string
-    {
-        $widths = [4, 11, 28, 18, 16, 18, 18, 25];
-        $line = '';
-
-        foreach ($values as $index => $value) {
-            $line .= str_pad($this->fitText((string) $value, $widths[$index]), $widths[$index]).' ';
-        }
-
-        return rtrim($line);
-    }
-
-    private function fitText(string $text, int $width): string
-    {
-        $text = preg_replace('/\s+/', ' ', trim($text));
-
-        if (mb_strwidth($text) <= $width) {
-            return $text;
-        }
-
-        return mb_strimwidth($text, 0, max(0, $width - 3), '...');
-    }
-
-    private function chunkLinesForPdf(array $lines): array
-    {
-        $pages = [];
-        $current = [];
-        $maxLines = 42;
-
-        foreach ($lines as $line) {
-            $current[] = $line;
-
-            if (count($current) >= $maxLines) {
-                $pages[] = $current;
-                $current = [];
-            }
-        }
-
-        if ($current !== []) {
-            $pages[] = $current;
-        }
-
-        return $pages ?: [[]];
-    }
-
-    private function makePdf(array $pages): string
+    private function makePdf(array $pages, array $context): string
     {
         $objects = [
             1 => '<< /Type /Catalog /Pages 2 0 R >>',
             2 => '',
-            3 => '<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>',
+            3 => '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+            4 => '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>',
         ];
 
         $kids = [];
-        $nextObject = 4;
+        $nextObject = 5;
         $pageWidth = 842;
         $pageHeight = 595;
 
-        foreach ($pages as $pageIndex => $lines) {
+        foreach ($pages as $pageIndex => $rows) {
             $contentObject = $nextObject++;
             $pageObject = $nextObject++;
             $kids[] = $pageObject.' 0 R';
-            $stream = $this->pageStream($lines, $pageIndex + 1, count($pages));
+            $stream = $this->pageStream($rows, $pageIndex + 1, count($pages), $context);
 
             $objects[$contentObject] = "<< /Length ".strlen($stream)." >>\nstream\n{$stream}\nendstream";
-            $objects[$pageObject] = "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 {$pageWidth} {$pageHeight}] /Resources << /Font << /F1 3 0 R >> >> /Contents {$contentObject} 0 R >>";
+            $objects[$pageObject] = "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 {$pageWidth} {$pageHeight}] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents {$contentObject} 0 R >>";
         }
 
         $objects[2] = '<< /Type /Pages /Kids ['.implode(' ', $kids).'] /Count '.count($kids).' >>';
@@ -242,31 +200,154 @@ class ReportController extends Controller
         return $pdf;
     }
 
-    private function pageStream(array $lines, int $page, int $totalPages): string
+    private function pageStream(array $rows, int $page, int $totalPages, array $context): string
+    {
+        $stream = '';
+        $stream .= $this->drawHeader();
+        $stream .= $this->drawReportInfo($context);
+        $stream .= $this->drawTable($rows);
+
+        $stream .= $this->drawText('Dicetak melalui SIPENO Disdukcapil pada '.$context['printed_at'], 36, 24, 7, 'F1', [0.35, 0.39, 0.45]);
+        $stream .= $this->drawText('Halaman '.$page.' dari '.$totalPages, 740, 24, 7, 'F1', [0.35, 0.39, 0.45]);
+
+        return $stream;
+    }
+
+    private function drawHeader(): string
+    {
+        $stream = '';
+        $stream .= $this->fillRect(36, 510, 770, 56, [0.93, 0.96, 1.00]);
+        $stream .= $this->strokeRect(36, 510, 770, 56, [0.78, 0.84, 0.94]);
+
+        // Logo mark SIPENO.
+        $stream .= $this->fillRect(50, 522, 34, 34, [0.12, 0.28, 0.63]);
+        $stream .= $this->drawText('S', 62, 534, 18, 'F2', [1, 1, 1]);
+        $stream .= $this->drawText('SIPENO DISDUKCAPIL', 98, 546, 16, 'F2', [0.08, 0.12, 0.20]);
+        $stream .= $this->drawText('Sistem Penomoran Surat Dinas', 98, 532, 9, 'F1', [0.25, 0.31, 0.40]);
+        $stream .= $this->drawText('Laporan resmi pengajuan dan penomoran surat bulanan', 98, 520, 8, 'F1', [0.39, 0.45, 0.55]);
+
+        $stream .= $this->drawText('LAPORAN BULANAN', 664, 543, 12, 'F2', [0.12, 0.28, 0.63]);
+        $stream .= $this->drawText('Nomor Surat', 704, 529, 8, 'F1', [0.39, 0.45, 0.55]);
+        $stream .= $this->line(36, 500, 806, 500, [0.12, 0.28, 0.63], 1.2);
+
+        return $stream;
+    }
+
+    private function drawReportInfo(array $context): string
+    {
+        $stream = '';
+        $stream .= $this->fillRect(36, 450, 770, 36, [1, 1, 1]);
+        $stream .= $this->strokeRect(36, 450, 770, 36, [0.88, 0.91, 0.95]);
+
+        $stream .= $this->drawText('Periode', 52, 472, 8, 'F2', [0.39, 0.45, 0.55]);
+        $stream .= $this->drawText($context['periode'], 52, 458, 11, 'F2', [0.08, 0.12, 0.20]);
+
+        $stream .= $this->drawText('Bidang', 208, 472, 8, 'F2', [0.39, 0.45, 0.55]);
+        $stream .= $this->drawText($this->fitText($context['bidang'], 42), 208, 458, 11, 'F2', [0.08, 0.12, 0.20]);
+
+        $stream .= $this->drawText('Total Surat', 520, 472, 8, 'F2', [0.39, 0.45, 0.55]);
+        $stream .= $this->drawText((string) $context['total'].' surat', 520, 458, 11, 'F2', [0.08, 0.12, 0.20]);
+
+        $rekap = $context['rekap_jenis'] === [] ? 'Rekap jenis: tidak ada data' : 'Rekap jenis: '.implode('; ', $context['rekap_jenis']);
+        $stream .= $this->drawText($this->fitText($rekap, 128), 36, 430, 8, 'F1', [0.35, 0.39, 0.45]);
+
+        return $stream;
+    }
+
+    private function drawTable(array $rows): string
     {
         $stream = '';
         $x = 36;
-        $y = 555;
-        $fontSize = 7;
-        $lineHeight = 12;
+        $y = 398;
+        $rowHeight = 18;
+        $headers = ['No', 'Tanggal', 'Nomor Surat', 'Pembuat', 'Bidang', 'Jenis', 'Pengolah', 'Ditujukan Kepada'];
+        $widths = [26, 58, 112, 90, 105, 115, 95, 169];
 
-        foreach ($lines as $line) {
-            $stream .= sprintf(
-                "BT /F1 %.1f Tf %.1f %.1f Td (%s) Tj ET\n",
-                $fontSize,
-                $x,
-                $y,
-                $this->escapePdfText($line)
-            );
-            $y -= $lineHeight;
+        $stream .= $this->fillRect($x, $y, array_sum($widths), $rowHeight, [0.12, 0.28, 0.63]);
+        $cursor = $x;
+        foreach ($headers as $index => $header) {
+            $stream .= $this->drawText($header, $cursor + 4, $y + 6, 7, 'F2', [1, 1, 1]);
+            $cursor += $widths[$index];
         }
 
-        $stream .= sprintf(
-            "BT /F1 7 Tf 730 24 Td (%s) Tj ET\n",
-            $this->escapePdfText('Halaman '.$page.' dari '.$totalPages)
-        );
+        $y -= $rowHeight;
+
+        if ($rows === []) {
+            $stream .= $this->strokeRect($x, $y - 14, array_sum($widths), 32, [0.88, 0.91, 0.95]);
+            $stream .= $this->drawText('Tidak ada data surat pada periode ini.', $x + 250, $y, 9, 'F1', [0.39, 0.45, 0.55]);
+            return $stream;
+        }
+
+        foreach ($rows as $rowIndex => $row) {
+            if ($rowIndex % 2 === 0) {
+                $stream .= $this->fillRect($x, $y, array_sum($widths), $rowHeight, [0.98, 0.99, 1.00]);
+            }
+
+            $stream .= $this->strokeRect($x, $y, array_sum($widths), $rowHeight, [0.90, 0.93, 0.96], 0.4);
+            $cursor = $x;
+
+            foreach ($row as $index => $value) {
+                $stream .= $this->drawText(
+                    $this->fitText((string) $value, $this->columnTextWidth($widths[$index])),
+                    $cursor + 4,
+                    $y + 6,
+                    7,
+                    $index === 2 ? 'F2' : 'F1',
+                    [0.12, 0.16, 0.23]
+                );
+                $cursor += $widths[$index];
+            }
+
+            $y -= $rowHeight;
+        }
 
         return $stream;
+    }
+
+    private function columnTextWidth(int $width): int
+    {
+        return max(4, (int) floor(($width - 8) / 4.1));
+    }
+
+    private function drawText(string $text, float $x, float $y, float $size, string $font = 'F1', array $rgb = [0, 0, 0]): string
+    {
+        return sprintf(
+            "%.3f %.3f %.3f rg BT /%s %.1f Tf %.1f %.1f Td (%s) Tj ET\n",
+            $rgb[0],
+            $rgb[1],
+            $rgb[2],
+            $font,
+            $size,
+            $x,
+            $y,
+            $this->escapePdfText($text)
+        );
+    }
+
+    private function fillRect(float $x, float $y, float $w, float $h, array $rgb): string
+    {
+        return sprintf("%.3f %.3f %.3f rg %.1f %.1f %.1f %.1f re f\n", $rgb[0], $rgb[1], $rgb[2], $x, $y, $w, $h);
+    }
+
+    private function strokeRect(float $x, float $y, float $w, float $h, array $rgb, float $lineWidth = 0.8): string
+    {
+        return sprintf("%.3f %.3f %.3f RG %.1f w %.1f %.1f %.1f %.1f re S\n", $rgb[0], $rgb[1], $rgb[2], $lineWidth, $x, $y, $w, $h);
+    }
+
+    private function line(float $x1, float $y1, float $x2, float $y2, array $rgb, float $lineWidth = 1): string
+    {
+        return sprintf("%.3f %.3f %.3f RG %.1f w %.1f %.1f m %.1f %.1f l S\n", $rgb[0], $rgb[1], $rgb[2], $lineWidth, $x1, $y1, $x2, $y2);
+    }
+
+    private function fitText(string $text, int $width): string
+    {
+        $text = preg_replace('/\s+/', ' ', trim($text));
+
+        if (mb_strwidth($text) <= $width) {
+            return $text;
+        }
+
+        return mb_strimwidth($text, 0, max(0, $width - 3), '...');
     }
 
     private function escapePdfText(string $text): string
