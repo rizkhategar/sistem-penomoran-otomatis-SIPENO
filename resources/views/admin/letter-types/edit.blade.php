@@ -1,8 +1,8 @@
 <x-app-layout>
     <x-slot name="header">
         <div>
-            <h2 class="text-xl font-bold text-gray-800">Edit Jenis Surat</h2>
-            <p class="text-sm text-gray-500 mt-0.5">Ubah relasi bidang dan jenis surat dari master data</p>
+            <h2 class="text-xl font-bold text-gray-800">Edit Surat per Bidang</h2>
+            <p class="text-sm text-gray-500 mt-0.5">Ubah pasangan bidang dan jenis surat yang tersedia.</p>
         </div>
     </x-slot>
 
@@ -49,11 +49,11 @@
                         <div class="mb-6">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Kode Surat</label>
                             <input type="text" value="{{ $letterType->code }}" class="w-full border-gray-200 rounded-xl shadow-sm bg-gray-100 px-4 py-2.5 text-gray-500" readonly>
-                            <p class="text-xs text-gray-400 mt-1.5">Kode surat dibuat otomatis dari master jenis surat dan master bidang.</p>
+                            <p class="text-xs text-gray-400 mt-1.5">Kode surat dibuat otomatis dari kode jenis surat dan kode bidang.</p>
                         </div>
 
                         <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi <span class="text-gray-400">(opsional)</span></label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Catatan <span class="text-gray-400">(opsional)</span></label>
                             <textarea name="description" rows="3" class="w-full border-gray-200 rounded-xl shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 px-4 py-2.5">{{ old('description', $letterType->description) }}</textarea>
                             @error('description') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
                         </div>
