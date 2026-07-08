@@ -5,6 +5,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LetterSubmissionController;
 use App\Http\Controllers\AdminLetterController;
 use App\Http\Controllers\LetterTypeController;
+use App\Http\Controllers\MasterBidangController;
+use App\Http\Controllers\MasterJenisSuratController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
@@ -55,6 +57,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/submissions', [AdminLetterController::class, 'index'])->name('submissions.index');
     Route::get('/submissions/{submission}', [AdminLetterController::class, 'show'])->name('submissions.show');
     Route::delete('/submissions/{submission}', [AdminLetterController::class, 'destroy'])->name('submissions.destroy');
+
+    Route::resource('master-bidangs', MasterBidangController::class)
+        ->except(['show']);
+    Route::resource('master-jenis-surats', MasterJenisSuratController::class)
+        ->except(['show']);
 
     Route::resource('letter-types', LetterTypeController::class)
         ->except(['show']);
