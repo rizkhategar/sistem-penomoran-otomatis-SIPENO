@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\LetterDailySequence;
 use App\Models\LetterSubmission;
 use App\Models\LetterType;
+use App\Models\MasterBidang;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -75,24 +76,17 @@ class LetterSubmissionController extends Controller
 
     private function bidangOptions(): array
     {
-        return [
+        $bidangs = MasterBidang::where('is_active', true)
+            ->orderBy('name')
+            ->pluck('name')
+            ->values()
+            ->all();
+
+        return $bidangs ?: [
             'PELAYANAN PENDAFTARAN PENDUDUK',
             'PELAYANAN PENCATATAN SIPIL',
             'PIAK',
             'SEKRETARIATAN',
-        ];
-    }
-
-    private function letterTypeOrder(): array
-    {
-        return [
-            'Surat Tugas & SPPD',
-            'Surat Tugas',
-            'Nota Dinas',
-            'Naskah Dinas Korespondensi Internal',
-            'Naskah Dinas Korespondensi Eksternal',
-            'Naskah Dinas Khusus',
-            'Naskah Dinas Surat',
         ];
     }
 
@@ -112,14 +106,13 @@ class LetterSubmissionController extends Controller
                 ->with('error', 'Admin hanya mengelola surat yang sudah diajukan dan tidak membuat nomor surat.');
         }
 
-        $order = $this->letterTypeOrder();
         $bidangs = $this->bidangOptions();
-        $letterTypes = LetterType::where('is_active', true)
-            ->whereIn('name', $order)
+        $letterTypes = LetterType::with(['masterBidang', 'masterJenisSurat'])
+            ->where('is_active', true)
             ->whereIn('bidang', $bidangs)
-            ->get()
-            ->sortBy(fn ($type) => array_search($type->name, $order, true))
-            ->values();
+            ->orderBy('bidang')
+            ->orderBy('name')
+            ->get();
 
         return view('submissions.create', compact('letterTypes', 'bidangs'));
     }
