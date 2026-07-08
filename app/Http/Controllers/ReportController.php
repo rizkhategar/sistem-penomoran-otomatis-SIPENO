@@ -46,8 +46,8 @@ class ReportController extends Controller
 
     private function reportBaseQuery(Request $request): array
     {
-        $bulan = (int) ($request->bulan ?? now()->format('n'));
-        $tahun = (int) ($request->tahun ?? now()->format('Y'));
+        $bulan = (int) ($request->bulan ?? now('Asia/Jakarta')->format('n'));
+        $tahun = (int) ($request->tahun ?? now('Asia/Jakarta')->format('Y'));
         $bidang = $request->bidang;
 
         $baseQuery = LetterSubmission::with(['user', 'letterType']);
@@ -83,7 +83,7 @@ class ReportController extends Controller
             ->withQueryString();
 
         $months = $this->months();
-        $tahuns = range(now()->year - 2, now()->year + 1);
+        $tahuns = range(now('Asia/Jakarta')->year - 2, now('Asia/Jakarta')->year + 1);
 
         return view('report.index', compact(
             'submissions',
@@ -121,7 +121,7 @@ class ReportController extends Controller
 
             return [
                 (string) ($index + 1),
-                $date?->format('d/m/Y') ?? '-',
+                $date?->timezone('Asia/Jakarta')->format('d/m/Y') ?? '-',
                 $submission->letter_number ?: '-',
                 $submission->user->name ?? '-',
                 $submission->letterType->bidang ?? '-',
@@ -139,7 +139,7 @@ class ReportController extends Controller
             'periode' => $months[$bulan - 1].' '.$tahun,
             'bidang' => $bidang ?: 'Semua Bidang',
             'total' => $submissions->count(),
-            'printed_at' => now()->format('d/m/Y H:i'),
+            'printed_at' => now('Asia/Jakarta')->format('d/m/Y H:i').' WIB',
             'rekap_jenis' => $rekapJenis,
         ];
 
