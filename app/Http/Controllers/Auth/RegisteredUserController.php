@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\MasterBidang;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,7 +16,13 @@ class RegisteredUserController extends Controller
 {
     private function bidangOptions(): array
     {
-        return [
+        $bidangs = MasterBidang::where('is_active', true)
+            ->orderBy('name')
+            ->pluck('name')
+            ->values()
+            ->all();
+
+        return $bidangs ?: [
             'PELAYANAN PENDAFTARAN PENDUDUK',
             'PELAYANAN PENCATATAN SIPIL',
             'PIAK',
