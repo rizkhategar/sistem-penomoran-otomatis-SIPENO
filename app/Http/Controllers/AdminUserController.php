@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MasterBidang;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -12,7 +13,13 @@ class AdminUserController extends Controller
 {
     private function bidangOptions(): array
     {
-        return [
+        $bidangs = MasterBidang::where('is_active', true)
+            ->orderBy('name')
+            ->pluck('name')
+            ->values()
+            ->all();
+
+        return $bidangs ?: [
             'PELAYANAN PENDAFTARAN PENDUDUK',
             'PELAYANAN PENCATATAN SIPIL',
             'PIAK',
