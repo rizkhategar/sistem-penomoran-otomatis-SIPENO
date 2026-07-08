@@ -49,8 +49,16 @@
 
                         <div class="mb-6">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Format Nomor Surat</label>
-                            <input id="numberFormatInput" type="text" name="number_format" value="{{ old('number_format', '000/000/00.0.0.0') }}" class="w-full border-gray-200 rounded-xl shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 px-4 py-2.5 font-mono tracking-wide" inputmode="numeric" autocomplete="off" spellcheck="false" maxlength="16" required>
-                            <p class="text-xs text-gray-400 mt-1.5">Pemisah / dan . dibuat tetap. Angka yang dihapus akan kembali menjadi 0, jadi cukup ganti angka sesuai kebutuhan.</p>
+                            <input
+                                type="text"
+                                name="number_format"
+                                value="{{ old('number_format') }}"
+                                class="w-full border-gray-200 rounded-xl shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 px-4 py-2.5"
+                                placeholder="Contoh: 470/800/00.1.2.3"
+                                autocomplete="off"
+                                required
+                            >
+                            <p class="text-xs text-gray-400 mt-1.5">Isi manual sesuai format yang dibutuhkan. Contoh hasil nomor: 001/470/800/00.1.2.3</p>
                             @error('number_format') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
                         </div>
 
@@ -124,85 +132,6 @@
                             const skCheckbox = document.querySelector('[name="is_sk"]');
                             skCheckbox?.addEventListener('change', function() {
                                 document.getElementById('skDateField').classList.toggle('hidden', !this.checked);
-                            });
-
-                            const numberFormatInput = document.getElementById('numberFormatInput');
-                            const numberMask = '000/000/00.0.0.0';
-                            const editableIndexes = [...numberMask].map((char, index) => char === '0' ? index : null).filter(index => index !== null);
-
-                            function normalizeNumberFormat(value) {
-                                const digits = String(value || '').replace(/\D/g, '').slice(0, editableIndexes.length);
-                                const chars = numberMask.split('');
-                                editableIndexes.forEach((position, index) => chars[position] = digits[index] ?? '0');
-                                return chars.join('');
-                            }
-
-                            function getEditableIndex(position, direction = 1) {
-                                if (editableIndexes.includes(position)) return position;
-                                if (direction < 0) return [...editableIndexes].reverse().find(index => index < position) ?? editableIndexes[0];
-                                return editableIndexes.find(index => index >= position) ?? editableIndexes[editableIndexes.length - 1];
-                            }
-
-                            function setNumberCaret(position, selectDigit = true) {
-                                const editablePosition = getEditableIndex(position);
-                                requestAnimationFrame(() => numberFormatInput.setSelectionRange(editablePosition, selectDigit ? editablePosition + 1 : editablePosition));
-                            }
-
-                            function setDigitAt(position, digit) {
-                                const chars = normalizeNumberFormat(numberFormatInput.value).split('');
-                                chars[position] = digit;
-                                numberFormatInput.value = chars.join('');
-                            }
-
-                            numberFormatInput.value = normalizeNumberFormat(numberFormatInput.value);
-                            numberFormatInput.addEventListener('focus', function() { setNumberCaret(this.selectionStart ?? 0); });
-                            numberFormatInput.addEventListener('click', function() { setNumberCaret(this.selectionStart ?? 0); });
-                            numberFormatInput.addEventListener('keydown', function(event) {
-                                const key = event.key;
-                                const currentPosition = this.selectionStart ?? 0;
-                                if (/^\d$/.test(key)) {
-                                    event.preventDefault();
-                                    const position = getEditableIndex(currentPosition);
-                                    setDigitAt(position, key);
-                                    setNumberCaret(editableIndexes.find(index => index > position) ?? position);
-                                    return;
-                                }
-                                if (key === 'Backspace' || key === 'Delete') {
-                                    event.preventDefault();
-                                    const position = getEditableIndex(currentPosition, key === 'Backspace' ? -1 : 1);
-                                    setDigitAt(position, '0');
-                                    setNumberCaret(position);
-                                    return;
-                                }
-                                if (key === 'ArrowLeft') {
-                                    event.preventDefault();
-                                    setNumberCaret([...editableIndexes].reverse().find(index => index < currentPosition) ?? editableIndexes[0]);
-                                    return;
-                                }
-                                if (key === 'ArrowRight') {
-                                    event.preventDefault();
-                                    setNumberCaret(editableIndexes.find(index => index > currentPosition) ?? editableIndexes[editableIndexes.length - 1]);
-                                    return;
-                                }
-                                if (key === 'Home') { event.preventDefault(); setNumberCaret(editableIndexes[0]); return; }
-                                if (key === 'End') { event.preventDefault(); setNumberCaret(editableIndexes[editableIndexes.length - 1]); return; }
-                                if (!['Tab', 'Shift'].includes(key)) event.preventDefault();
-                            });
-                            numberFormatInput.addEventListener('paste', function(event) {
-                                event.preventDefault();
-                                const pastedDigits = (event.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, editableIndexes.length);
-                                const chars = normalizeNumberFormat(this.value).split('');
-                                const startPosition = getEditableIndex(this.selectionStart ?? 0);
-                                const startIndex = editableIndexes.indexOf(startPosition);
-                                [...pastedDigits].forEach((digit, offset) => {
-                                    const targetPosition = editableIndexes[startIndex + offset];
-                                    if (targetPosition !== undefined) chars[targetPosition] = digit;
-                                });
-                                this.value = chars.join('');
-                                setNumberCaret(editableIndexes[Math.min(startIndex + pastedDigits.length, editableIndexes.length - 1)]);
-                            });
-                            numberFormatInput.form?.addEventListener('submit', function() {
-                                numberFormatInput.value = normalizeNumberFormat(numberFormatInput.value);
                             });
                         </script>
 
