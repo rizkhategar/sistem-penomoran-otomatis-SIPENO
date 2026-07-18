@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div>
             <h2 class="text-xl font-bold text-gray-800">Pasangkan Surat ke Bidang</h2>
-            <p class="text-sm text-gray-500 mt-0.5">Pilih bidang, lalu pilih jenis surat yang boleh dibuat oleh bidang tersebut.</p>
+            <p class="text-sm text-gray-500 mt-0.5">Pilih bidang, lalu pilih jenis surat dari Data Jenis Surat.</p>
         </div>
     </x-slot>
 
@@ -20,7 +20,7 @@
             @endif
 
             <div class="mb-6 bg-blue-50 border border-blue-100 rounded-2xl p-5 text-sm text-blue-900">
-                <p>Contoh: bidang <b>PIAK</b> dipasangkan dengan jenis surat <b>Nota Dinas</b>. Setelah disimpan, user bidang PIAK bisa memilih Nota Dinas pada form Buat Surat.</p>
+                <p>Nama jenis surat tidak diketik manual. Pilihan diambil langsung dari menu <b>Data Jenis Surat</b>. Jika jenis surat belum tersedia, tambahkan terlebih dahulu pada menu tersebut.</p>
             </div>
 
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -40,14 +40,13 @@
                         </div>
 
                         <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Surat</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Pilih Jenis Surat dari Data Jenis Surat</label>
                             <select name="master_jenis_surat_id" class="w-full border-gray-200 rounded-xl shadow-sm focus:border-blue-500 focus:ring-blue-500 bg-gray-50 px-4 py-2.5" required>
                                 <option value="">Pilih jenis surat</option>
                                 @foreach($jenisSurats as $jenisSurat)
                                     <option value="{{ $jenisSurat->id }}" {{ old('master_jenis_surat_id') == $jenisSurat->id ? 'selected' : '' }}>{{ $jenisSurat->name }}</option>
                                 @endforeach
                             </select>
-                            <p class="text-xs text-gray-400 mt-1.5">Kalau pilihan belum ada, tambahkan dulu di menu Data Bidang atau Data Jenis Surat.</p>
                             @error('master_jenis_surat_id') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
                         </div>
 
