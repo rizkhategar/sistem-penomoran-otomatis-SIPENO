@@ -43,7 +43,7 @@
                                     <option value="{{ $type->id }}" data-bidang="{{ $type->bidang }}" {{ old('letter_type_id') == $type->id ? 'selected' : '' }}>{{ $type->name }}</option>
                                 @endforeach
                             </select>
-                            <p class="text-xs text-gray-400 mt-1.5">Pilih bidang terlebih dahulu agar jenis surat sesuai bidangnya.</p>
+                            <p class="text-xs text-gray-400 mt-1.5">Pilihan jenis surat berasal dari Data Jenis Surat dan mengikuti bidang yang dipilih.</p>
                             @error('letter_type_id') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
                         </div>
 
@@ -82,11 +82,14 @@
                         <div class="mb-6">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Upload File (opsional)</label>
                             <div class="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-blue-400 transition cursor-pointer" onclick="document.getElementById('fileInput').click()">
+                                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-3">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5.002 5.002 0 0115.9 6H16a5 5 0 011 9.9M12 12v9m0-9l-3 3m3-3l3 3"/></svg>
+                                </div>
                                 <p class="text-sm text-gray-500 mb-1">Klik untuk upload file</p>
-                                <p class="text-xs text-gray-400">Format: PDF, JPG, PNG. Maks 2MB</p>
+                                <p class="text-xs text-gray-400">Format: PDF, Word (DOC/DOCX), JPG, JPEG, PNG. Maks 2MB</p>
                                 <p id="fileName" class="text-sm text-blue-600 font-medium mt-2 hidden"></p>
                             </div>
-                            <input id="fileInput" type="file" name="file" class="hidden" accept=".pdf,.jpg,.jpeg,.png" onchange="if (this.files[0]) { document.getElementById('fileName').textContent = this.files[0].name; document.getElementById('fileName').classList.remove('hidden'); }">
+                            <input id="fileInput" type="file" name="file" class="hidden" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onchange="if (this.files[0]) { document.getElementById('fileName').textContent = this.files[0].name; document.getElementById('fileName').classList.remove('hidden'); }">
                             @error('file') <p class="text-red-500 text-xs mt-1.5">{{ $message }}</p> @enderror
                         </div>
 
