@@ -131,11 +131,13 @@ class LetterSubmissionController extends Controller
             'pengolah' => 'required|string|max:255',
             'ditujukan_kepada' => 'required|string|max:255',
             'keperluan' => 'required|string|max:1000',
-            'file' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048',
+            'file' => 'nullable|mimes:pdf,doc,docx,jpg,jpeg,png|max:2048',
             'is_sk' => 'boolean',
             'submission_date' => 'nullable|date|before_or_equal:today',
         ], [
             'number_format.regex' => 'Format nomor hanya boleh berisi huruf, angka, spasi, garis miring (/), titik, dan strip.',
+            'file.mimes' => 'File harus berformat PDF, Word (DOC/DOCX), JPG, JPEG, atau PNG.',
+            'file.max' => 'Ukuran file maksimal 2 MB.',
         ]);
 
         $letterType = LetterType::findOrFail($request->letter_type_id);
