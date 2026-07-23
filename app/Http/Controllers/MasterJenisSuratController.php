@@ -14,11 +14,22 @@ class MasterJenisSuratController extends Controller
     {
         $this->syncAllActiveJenisSuratToActiveBidangs();
 
-        $jenisSurats = MasterJenisSurat::withCount('letterTypes')
+        $activeBidangIds = MasterBidang::where('is_active', true)->select('id');
+        $activeBidangCount = MasterBidang::where('is_active', true)->count();
+
+        $jenisSurats = MasterJenisSurat::query()
+            ->addSelect([
+                'active_bidangs_count' => LetterType::query()
+                    ->selectRaw('COUNT(DISTINCT master_bidang_id)')
+                    ->whereColumn('master_jenis_surat_id', 'master_jenis_surats.id')
+                    ->where('is_active', true)
+                    ->whereNotNull('master_bidang_id')
+                    ->whereIn('master_bidang_id', $activeBidangIds),
+            ])
             ->orderBy('name')
             ->paginate(15);
 
-        return view('admin.master-jenis-surats.index', compact('jenisSurats'));
+        return view('admin.master-jenis-surats.index', compact('jenisSurats', 'activeBidangCount'));
     }
 
     public function create()
@@ -41,10 +52,11 @@ class MasterJenisSuratController extends Controller
             'is_active' => true,
         ]);
 
-        $createdPairs = $this->makeAvailableForAllActiveBidangs($jenisSurat);
+        $this->makeAvailableForAllActiveBidangs($jenisSurat);
+        $activeBidangCount = MasterBidang::where('is_active', true)->count();
 
         return redirect()->route('admin.master-jenis-surats.index')
-            ->with('success', 'Data jenis surat berhasil ditambahkan dan otomatis tersedia pada '.$createdPairs.' bidang aktif.');
+            ->with('success', 'Data jenis surat berhasil ditambahkan dan otomatis tersedia pada '.$activeBidangCount.' bidang aktif.');
     }
 
     public function edit(MasterJenisSurat $masterJenisSurat)
@@ -72,13 +84,15 @@ class MasterJenisSuratController extends Controller
             $this->makeAvailableForAllActiveBidangs($masterJenisSurat);
         }
 
+        $this->syncExistingLetterTypeData($masterJenisSurat);
+
         return redirect()->route('admin.master-jenis-surats.index')->with('success', 'Data jenis surat berhasil diupdate.');
     }
 
     public function destroy(MasterJenisSurat $masterJenisSurat)
     {
         if ($masterJenisSurat->letterTypes()->exists()) {
-            return back()->with('error', 'Jenis surat tidak bisa dihapus karena sudah dipakai pada surat per bidang. Nonaktifkan saja jika tidak digunakan lagi.');
+            return back()->with('error', 'Jenis surat tidak bisa dihapus karena sudah digunakan. Nonaktifkan saja jika tidak digunakan lagi.');
         }
 
         $masterJenisSurat->delete();
@@ -93,12 +107,10 @@ class MasterJenisSuratController extends Controller
         });
     }
 
-    private function makeAvailableForAllActiveBidangs(MasterJenisSurat $jenisSurat): int
+    private function makeAvailableForAllActiveBidangs(MasterJenisSurat $jenisSurat): void
     {
-        $count = 0;
-
-        MasterBidang::where('is_active', true)->get()->each(function (MasterBidang $bidang) use ($jenisSurat, &$count) {
-            $letterType = LetterType::firstOrCreate(
+        MasterBidang::where('is_active', true)->get()->each(function (MasterBidang $bidang) use ($jenisSurat) {
+            LetterType::firstOrCreate(
                 [
                     'master_bidang_id' => $bidang->id,
                     'master_jenis_surat_id' => $jenisSurat->id,
@@ -113,13 +125,26 @@ class MasterJenisSuratController extends Controller
                     'is_active' => true,
                 ]
             );
-
-            if ($letterType->wasRecentlyCreated) {
-                $count++;
-            }
         });
+    }
 
-        return $count;
+    private function syncExistingLetterTypeData(MasterJenisSurat $jenisSurat): void
+    {
+        $jenisSurat->letterTypes()
+            ->with('masterBidang')
+            ->get()
+            ->each(function (LetterType $letterType) use ($jenisSurat) {
+                if (!$letterType->masterBidang) {
+                    return;
+                }
+
+                $letterType->update([
+                    'name' => $jenisSurat->name,
+                    'code' => $this->makeLetterTypeCode($jenisSurat, $letterType->masterBidang),
+                    'description' => $jenisSurat->description,
+                    'bidang' => $letterType->masterBidang->name,
+                ]);
+            });
     }
 
     private function makeLetterTypeCode(MasterJenisSurat $jenisSurat, MasterBidang $bidang): string
