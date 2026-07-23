@@ -5,14 +5,29 @@ namespace App\Http\Controllers;
 use App\Models\LetterType;
 use App\Models\MasterBidang;
 use App\Models\MasterJenisSurat;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class MasterBidangController extends Controller
 {
     public function index()
     {
-        $bidangs = MasterBidang::withCount('letterTypes')
+        $bidangs = MasterBidang::query()
+            ->withCount('letterTypes')
+            ->selectSub(function ($query) {
+                $query->from('letter_submissions')
+                    ->join('letter_types', 'letter_submissions.letter_type_id', '=', 'letter_types.id')
+                    ->whereColumn('letter_types.master_bidang_id', 'master_bidangs.id')
+                    ->selectRaw('COUNT(*)');
+            }, 'submissions_count')
+            ->selectSub(
+                User::query()
+                    ->selectRaw('COUNT(*)')
+                    ->whereColumn('users.bidang', 'master_bidangs.name'),
+                'users_count'
+            )
             ->orderBy('name')
             ->paginate(15);
 
@@ -71,13 +86,41 @@ class MasterBidangController extends Controller
 
     public function destroy(MasterBidang $masterBidang)
     {
-        if ($masterBidang->letterTypes()->exists()) {
-            return back()->with('error', 'Bidang tidak bisa dihapus karena sudah dipakai pada surat per bidang. Nonaktifkan saja jika tidak digunakan lagi.');
+        $submissionCount = DB::table('letter_submissions')
+            ->join('letter_types', 'letter_submissions.letter_type_id', '=', 'letter_types.id')
+            ->where('letter_types.master_bidang_id', $masterBidang->id)
+            ->count();
+
+        $userCount = User::where('bidang', $masterBidang->name)->count();
+
+        if ($submissionCount > 0 || $userCount > 0) {
+            $reasons = [];
+
+            if ($submissionCount > 0) {
+                $reasons[] = $submissionCount.' surat';
+            }
+
+            if ($userCount > 0) {
+                $reasons[] = $userCount.' akun user';
+            }
+
+            return back()->with(
+                'error',
+                'Bidang tidak dapat dihapus karena sudah digunakan oleh '.implode(' dan ', $reasons).'. Nonaktifkan bidang melalui menu Edit agar riwayat data tetap aman.'
+            );
         }
 
-        $masterBidang->delete();
+        DB::transaction(function () use ($masterBidang) {
+            $masterBidang->letterTypes()->get()->each(function (LetterType $letterType) {
+                $letterType->numberSequences()->delete();
+                $letterType->delete();
+            });
 
-        return redirect()->route('admin.master-bidangs.index')->with('success', 'Data bidang berhasil dihapus.');
+            $masterBidang->delete();
+        });
+
+        return redirect()->route('admin.master-bidangs.index')
+            ->with('success', 'Bidang beserta pasangan jenis surat yang belum pernah digunakan berhasil dihapus permanen.');
     }
 
     private function makeAllActiveJenisSuratAvailableForBidang(MasterBidang $bidang): int

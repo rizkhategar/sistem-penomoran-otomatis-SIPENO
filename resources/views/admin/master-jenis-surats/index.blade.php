@@ -20,6 +20,10 @@
                 <div class="mb-6 bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-xl">{{ session('error') }}</div>
             @endif
 
+            <div class="mb-6 bg-blue-50 border border-blue-100 rounded-2xl px-5 py-4 text-sm text-blue-900">
+                <p><b>{{ $activeBidangCount }} bidang aktif.</b> Setiap jenis surat baru otomatis tersedia pada seluruh bidang aktif. Angka pada kolom <b>Dipakai pada</b> hanya menghitung bidang aktif yang valid.</p>
+            </div>
+
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-100">
@@ -39,7 +43,9 @@
                                     <td class="px-5 py-4 text-sm font-mono font-semibold text-blue-700">{{ $jenisSurat->code ?? '-' }}</td>
                                     <td class="px-5 py-4 text-sm font-semibold text-gray-800">{{ $jenisSurat->name }}</td>
                                     <td class="px-5 py-4 text-sm text-gray-500 max-w-xs truncate">{{ $jenisSurat->description ?? '-' }}</td>
-                                    <td class="px-5 py-4 text-sm text-gray-500">{{ $jenisSurat->letter_types_count }} bidang</td>
+                                    <td class="px-5 py-4 text-sm text-gray-500">
+                                        {{ $jenisSurat->is_active ? (int) $jenisSurat->active_bidangs_count : 0 }} dari {{ $activeBidangCount }} bidang
+                                    </td>
                                     <td class="px-5 py-4">
                                         <span class="text-xs px-2.5 py-1 rounded-full {{ $jenisSurat->is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600' }}">
                                             {{ $jenisSurat->is_active ? 'Aktif' : 'Nonaktif' }}

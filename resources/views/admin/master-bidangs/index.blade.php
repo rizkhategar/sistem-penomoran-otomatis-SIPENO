@@ -20,6 +20,11 @@
                 <div class="mb-6 bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-xl">{{ session('error') }}</div>
             @endif
 
+            <div class="mb-6 bg-blue-50 border border-blue-100 rounded-2xl px-5 py-4 text-sm text-blue-900">
+                <p class="font-semibold mb-1">Aturan penghapusan bidang</p>
+                <p>Bidang yang belum pernah dipakai oleh akun user dan belum memiliki surat dapat dihapus permanen. Jika sudah digunakan, bidang hanya dapat dinonaktifkan melalui menu <b>Edit</b> agar riwayat surat tetap tersimpan.</p>
+            </div>
+
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-100">
@@ -34,22 +39,33 @@
                         </thead>
                         <tbody class="divide-y divide-gray-100">
                             @forelse($bidangs as $bidang)
+                                @php
+                                    $canDelete = (int) $bidang->submissions_count === 0 && (int) $bidang->users_count === 0;
+                                @endphp
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-5 py-4 text-sm font-mono font-semibold text-blue-700">{{ $bidang->code ?? '-' }}</td>
                                     <td class="px-5 py-4 text-sm font-semibold text-gray-800">{{ $bidang->name }}</td>
-                                    <td class="px-5 py-4 text-sm text-gray-500">{{ $bidang->letter_types_count }} jenis surat</td>
+                                    <td class="px-5 py-4 text-sm text-gray-500">
+                                        <div>{{ $bidang->letter_types_count }} jenis surat</div>
+                                        <div class="text-xs text-gray-400 mt-1">{{ (int) $bidang->submissions_count }} surat &bull; {{ (int) $bidang->users_count }} user</div>
+                                    </td>
                                     <td class="px-5 py-4">
                                         <span class="text-xs px-2.5 py-1 rounded-full {{ $bidang->is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600' }}">
                                             {{ $bidang->is_active ? 'Aktif' : 'Nonaktif' }}
                                         </span>
                                     </td>
                                     <td class="px-5 py-4 text-right">
-                                        <div class="flex justify-end gap-2">
+                                        <div class="flex justify-end items-center gap-2">
                                             <a href="{{ route('admin.master-bidangs.edit', $bidang) }}" class="text-sm text-blue-600 hover:text-blue-700 font-medium">Edit</a>
-                                            <form action="{{ route('admin.master-bidangs.destroy', $bidang) }}" method="POST" onsubmit="return confirm('Hapus bidang ini?')">
-                                                @csrf @method('DELETE')
-                                                <button type="submit" class="text-sm text-red-600 hover:text-red-700 font-medium">Hapus</button>
-                                            </form>
+
+                                            @if($canDelete)
+                                                <form action="{{ route('admin.master-bidangs.destroy', $bidang) }}" method="POST" onsubmit="return confirm('Bidang ini belum pernah digunakan. Hapus bidang beserta seluruh pasangan jenis suratnya secara permanen?')">
+                                                    @csrf @method('DELETE')
+                                                    <button type="submit" class="text-sm text-red-600 hover:text-red-700 font-medium">Hapus</button>
+                                                </form>
+                                            @else
+                                                <span class="text-xs text-gray-400" title="Sudah digunakan oleh surat atau akun user. Nonaktifkan melalui menu Edit.">Tidak dapat dihapus</span>
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>
